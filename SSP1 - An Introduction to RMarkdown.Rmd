@@ -1,0 +1,154 @@
+---
+title: "Activity SP1 - An Introduction to RMarkdown (Solutions)"
+author: "STS272 (Dr. VanKrevelen)"
+date: 'Updated: 9/5/2021'
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This file is an R Markdown file (ending in .RMD). Unlike a regular R script (ending in .R), we can mix text, code, and ouput in the same file. This means that we can run code in the same place where we discuss our results. There are even ways to make it so that our text automatically changes when we change our code. This could be useful for a company who wants a monthly report to update automatically with small changes to data/code.
+
+The process of creating the document that combines text, code, and output is called "Knitting." Try hitting the dropdown arrow on the button above that says Knit. For now, let's choose "Knit to HTML".
+
+1. Where does the Knitted document show up?
+
+It showed up in a separate pop up window. We were able to change the settings to have it show up in the Viewer pane by going to Tools --> Global Options --> RMarkdown --> Show output preview in  
+
+Note: I can add `<br>` as a line in my file to add a space in between lines of my knitted output. This can sometimes make it easier to read.
+
+
+<br>
+
+2. R Markdown files also allow you to format some of your text. For example, what happens when I put words between *one* or **two** asterisks?
+
+Words inside one asterisk are *italicized* and words inside two asterisks are **bolded**.
+
+
+<br>
+
+3. Let's take a look at adding code to our document. Notice how the section below this question has a gray background. This is an R **code chunk**. We can type code in this section and R will run it sequentially as it knits our document. Write code to create any sequence of numbers and then to find the mean of those numbers. In the text section below the code, write what is displayed when you knit the document.
+
+```{r}
+myseq <- c(4, 8, 15, 16, 23, 42)
+mean(myseq)
+```
+
+The knitted file displays the code and any output that would normally be produced in the console.
+
+
+<br>
+
+4. Let's use the code chunk below to load the `ggplot2` and `dplyr` libraries. Notice that we get some messages along with our code. We probably wouldn't want these in a formal document. At the top of the code chunk there is `{r}`. We can change some settings here to control what gets displayed / run. Try changing it to read `{r, message = FALSE}`. What happens when we do that?
+
+```{r, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+It gets rid of all the messages that were showing up in our knitted file when we loaded these two R packages.
+
+
+<br>
+
+5. Now let's try creating a graph. Use `ggplot()` to create a bar graph of `cut` in the `diamonds` data set. Add your code below then hit the little green triangle on the right side of the code chunk. What happens?
+
+```{r}
+ggplot(data = diamonds) +
+  geom_bar(aes(x = cut))
+```
+
+When we hit the green arrow it runs the code in this "R chunk" and displays the graph below. We can hit the little x in the top right of the graph to remove it from our RMarkdown document. It will still show up in our knitted file.
+
+
+<br>
+
+6. We already saw how we could use `message = FALSE` to remove messages when we run a code chunk. Try `echo = FALSE` and write down what it does. Then replace that with `eval = FALSE` and write down what it does.
+
+Using **echo = FALSE** makes it so our code doesn't display when we knit the document.
+
+Using **eval = FALSE** makes it so the code doesn't run but does show up.
+
+Using **message = FALSE** would still run the code and display normal output but would not show warning type messages. 
+
+
+<br>
+
+7. Let's try an example to see how we might use R Markdown to generate reports that auto update. Let's say I have a datset that will be updated each year and I want to be able to generate new reports with minimal work on my part. 
+
+Outside of this document, install the `gapminder` package. The package contains a data frame called `gapminder` that includes data on countries around the world in 5 year increments from 1952 through 2007. Below is some code to generate the mean and median life expectancy for 2002. It creates an object called `reportyear` and another called `lifeExpSummary`.
+
+```{r}
+library(gapminder)
+reportyear <- 2002
+
+lifeExpSummary <- gapminder %>%
+  filter(year == reportyear) %>%
+  summarize(MeanLE = mean(lifeExp), MedLE = median(lifeExp)) %>%
+  round(digits = 1)
+```
+
+Now in my text, I can tell someone that for the year `r reportyear` the mean life expectancy was `r lifeExpSummary$MeanLE` and the median life expectancy was `r lifeExpSummary$MedLE`. 
+
+These numbers will change if you just change the value I assign to `reportyear` above. Try it out for 1952 and 2007. Knit the document after you make each change.
+
+*We called R code within our text by putting it inside single tick marks and starting the text with the letter r followed by a space.*
+
+
+<br>
+
+8. What should I do if I wanted to display my analysis but not my code?
+
+echo = FALSE
+
+
+<br>
+
+9. It can be hard to memorize everything we can do with .RMD files. There are a collection of [RStudio cheatsheets at this link](https://www.rstudio.com/resources/cheatsheets/). These can be really useful documents. For example, the RMarkdown one helped me remember how to add a link to my document! Go to this link, find the RMarkdown cheatsheet, and pick a few of the features in the "Write With RMarkdown" section on the right of the page to experiment with below. Re-knit your document after to see if they worked!
+
+> This is a block quote
+
+Adding three lines like below creates a section break
+
+---
+
+This is an inline equation $2 + 2 = 4$
+
+This is an equation block below
+
+$$ e = mc^2$$
+
+Header
+---
+
+# Another header
+
+## A slightly smaller header
+
+### An even smaller header
+
+Below is a way to format data so it looks nicer in the knitted document
+
+```{r}
+data <- mtcars[1:4, 1:3]
+knitr::kable(data,
+ caption = "Table with kable")
+```
+
+Compare that to if we just print the data
+
+```{r}
+mtcars[1:4, 1:3]
+```
+
+[This is a link to moodle](http://moodle.elon.edu)
+
+
+<br>
+
+10. Lastly, if you have Microsoft Word, you can Knit to Word to create a Word document. This is what I have been doing for the notes and activities. Sometimes the formatting gets messed up a little, but you can then change it in Word if you need to. You can also Knit documents to pdf (what I prefer for a nice looking and easy to share file), but it requires you to have a separate program installed. See [here](https://yihui.org/tinytex/) for more info if you're interested.
