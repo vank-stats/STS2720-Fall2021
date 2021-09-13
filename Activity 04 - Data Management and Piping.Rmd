@@ -1,0 +1,106 @@
+---
+title: "Activity 04 - Data Management and Piping"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 9/1/2021'
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The goal of this activity is to get you comfortable using the pipe operator `%>%` and functions related to data management from the `dplyr` package. Below are the packages we will use for this activity. If you haven't already installed these, you will need to do that first using the `install.packages()` function.
+
+```{r, message = FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+
+1. The piping operator (`%>%`) is useful when we want to carry out a series of operations with our data. In the notes, I gave an example where I had to keep creating new objects just so that I could then do something to that object. Below is another example where the pipe operator might be useful. The code below is sort of hard to read and keep track of what's going on. Write a sentence or two about what this code is doing.
+
+```{r}
+round(mean(c(3, 4, 6)), digits = 2)
+```
+
+<br>
+<br>
+<br>
+
+2. Below is the same code using the pipe operator. Remember that we "read" the piping symbol `%>%` as "and then". Write a sentence or two about what this code is doing. Remember to use "and then" as you explain it.
+
+```{r}
+c(3, 4, 6) %>%
+  mean() %>%
+  round(digits = 2)
+```
+
+<br>
+<br>
+<br>
+
+3. Now that we've seen how the piping operator is used, let's take a step back and explore the other functions in Notes 4. The `filter()` function is used to "filter" your data to only include certain observations. The first argument is a data frame and that can be followed by any number of logical conditions that should be met for your new data frame. See [here](https://moderndive.com/3-wrangling.html#filter) for some of the logical operators you can use. Try to use the filter function to accomplish the following with the `diamonds` dataset.
+
+  - create a data frame called `diamonds_expensive` that contains only diamonds that cost more than $2,000.
+  - create a data frame called `diamonds_good` that contains only diamonds with a cut of Good
+  - create a data frame called `diamonds_small` that contains only diamonds with x, y, and z (length, width, and depth) all less than 5 mm.
+  - Bonus: create a data frame called `diamonds_best` that contains any diamond that has Ideal cut, D color, or IF clarity. (Note: We aren't just looking for diamonds that have all three of these things. At least one of them is enough. You will need to use the `|` operator to mean "or").
+
+<br>
+<br>
+<br>
+
+4. The `summarize()` function is used to create numeric summaries of your data. The first argument is the data frame and that can be followed by any number of arguments of the form "`name` = `howtocalculate`". Calculate the mean values for x, y, and z.
+
+```{r, eval = FALSE}
+summarize(diamonds, ___ = ___, ___ = ___, ___ = ___)
+```
+
+<br>
+<br>
+<br>
+
+5. The `group_by()` function puts our data into groups that are then used by other functions (like `summarize()`). The first argument is your data frame and that can be followed by any number of variables you want to group your data by. Use the `group_by()` function to group the diamonds data frame by cut, then use the pipe operator to pass that data frame to your previous summary you did in the last question.
+
+```{r, eval = FALSE}
+group_by(___, ___) %>%
+  summarize(___ = ___, ___ = ___, ___ = ___)
+```
+
+<br>
+<br>
+<br>
+
+6. You might wonder what happens if we group by two things. Re do the previous problem but group the data by cut ***and** color. (Note: You can add variable names separated by commas to group by multiple things)
+
+<br>
+<br>
+<br>
+
+7. Lastly, we learned that we could add variables to a data frame using the `mutate()` function. Again, the first argument is the data frame and that can be followed by any number of arguments of the form "`name` = `howtocalculate`" (like with summarize). Create a data frame called `diamonds2` that has two new variables as described below:
+
+  - called `volume` and calculated by multiplying x, y, and z together (this would be the volume is the diamond was a cube, which it isn't)
+  - called `price_can` and calculated by multiplying price by 1.25 (this would be the price in Canadian dollars (as of 9/5/2021))
+
+<br>
+<br>
+<br>
+
+8. Let's put everything together. Write code that uses the pipe operator to carry out the following tasks
+
+  - filter the data to only include "Ideal" cuts, create the variable `price_can`, group the data by color, calculate the mean and median Canadian price.
+  - create a variable called `price_1000s` that divides price by $1,000, filter the data to only include carat values above 2, group the data by cut and color, and calculate the minimum, median, and maximum values for `price_1000s`
+
+<br>
+<br>
+<br>
+
+9. If you finish, you can do any of the following:
+
+  - Consider what questions you still have or what's unclear and ask Dr. V
+  - Come up with your own examples of ways this might be useful
+  - Work on homework #2
+  - Start looking through Notes 1 - 4 to prepare for the exam next week. Consider what questions you might have.
+  - Look back at previous activities and either re-do the coding parts or test whether you understand the code before you run it to check your guess.

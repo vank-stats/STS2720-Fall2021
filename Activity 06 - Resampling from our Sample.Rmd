@@ -1,0 +1,71 @@
+---
+title: "Activity 06 - Resampling from our Sample"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 9/12/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(moderndive)
+```
+
+In the last activity, we saw what happens when we take many random samples from the same population. However, we don't usually have the luxury of doing that. So the question becomes: How can we use a single sample to learn some of the same information we see in the sampling distribution?
+
+1. First as some review... what do we mean by a sampling distribution?
+
+< Put your answer here >
+
+
+2. What did we see was true of our sampling distributions in our recent notes/activities?
+
+< Put your answer here >
+
+
+3. One way to learn more about the standard error (i.e. the sampling variability we'd see over many samples) is to perform what is called **bootstrap sampling** or **sampling with replacement** from our own sample. Let's start by generating the same sample of 50 diamonds that you got in our last activity. To do that, you'll use the `set.seed()` function to run the same code that you ran last class. Calculate the mean price of diamonds in your sample to verify it's the same thing you got before.
+
+```{r}
+
+```
+
+
+4. Now let's use our sample to generate 1,000 samples *with replacement* from our original sample (*not* from the population of all diamonds). Each "new sample" will still contain 50 diamonds, but won't be exactly the same as your original sample because you are leaving open the possibility that some diamonds get chosen more than once (or not at all). This will give us a sense of how things could have been a bit different if random chance had given us a slightly different sample. You can use the `rep_sample_n()` function again. This time though you'll add `reps = 1000` and `replace = TRUE`.
+
+```{r}
+
+```
+
+
+5. Calculate the sample mean price for each of your 1,000 bootstrap samples and make a histogram of the sample mean prices.
+
+```{r}
+
+```
+
+
+6. Is the center of the graph closer to your sample mean or to the population mean ($3,932.80)? Why is this?
+
+< Put your answer here >
+
+
+7. How does the *spread* of this graph compare to the one we made in Activity 05? You may want to calculate the standard deviation of your sample means. In Activity 05, the standard deviation for our sample means from samples of size 50 was around $560.
+
+< Put your answer here >
+
+
+8. What do you think will happen if you repeat what we've done so far but for your sample of 500 diamonds?
+
+< Put your answer here >
+
+
+9. When we use the percentile method for calculating a confidence interval, we find the middle xx% (usually 95%) of our sample means from our bootstrap distribution of sample means. We then claim that we can be 95% confident this range will contain the population mean. Why do you think we can feel comfortable making this claim?
+
+< Put your answer here >
+

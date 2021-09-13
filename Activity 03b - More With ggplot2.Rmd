@@ -1,0 +1,81 @@
+---
+title: "Activity 03b - More with ggplot2"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 9/7/2021'
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This activity will expand on Notes 03 and Activity 03a to continue to build your skills making graphs with the ggplot2 package in R. One helpful resource when making graphs is [this cheatsheet](https://raw.githubusercontent.com/rstudio/cheatsheets/master/data-visualization-2.1.pdf) on the RStudio website.
+
+1. For this activity, we're going to use a dataset called `penguins` from the `palmerpenguins` package in R. The data was collected by researchers in Antarctica and you can learn more about it [here](https://education.rstudio.com/blog/2020/07/palmerpenguins-cran/). You'll need to install the package the first time you do this activity. Then we'll load the `palmerpenguins` and `ggplot2` packages.
+
+```{r}
+#install.packages("palmerpenguins")
+library(palmerpenguins)
+library(ggplot2)
+```
+
+As you work through this activity, you should add code to your R script that helps you answer questions. Use R comments to identify which questions you are answering with different lines of code.
+
+2. Let's look into the `penguins` data frame a bit more before we start making our graphs. Use your preferred method to explore how many observations there are and what types of variables are available to us. Take some notes below.
+
+<br>
+<br>
+<br>
+
+3. Let's make a box plot comparing the flipper length (`flipper_length_mm`) between the differerent `species`. Below is a template to get you started.
+
+```{r, eval = FALSE}
+ggplot(data = penguins) +
+  geom_boxplot(aes(x = ___, y = ___))
+```
+
+4. Identify the different parts of a box plot, and give a few sentences explaining how the flipper lengths differ between the three species of penguin.
+
+<br>
+<br>
+<br>
+
+5. Use the `labs()` function to give your graph an appropriate title and more appropriate/informative axis labels.
+
+<br>
+<br>
+<br>
+
+6. Let's see what happens when we put `fill = __` inside the `aes()` function. Map the sex of the penguins to the fill aesthetic. Commment on what this does and on what you notice when the data is viewed this way.
+
+<br>
+<br>
+<br>
+
+7. Now we will change gears and make a bar graph. Let's make a bar graph of the number of penguins on each island. Because we have raw data instead of counts, we will use `geom_bar()`.
+
+<br>
+<br>
+<br>
+
+8. This graph looks a little boring... Let's try using the color and/or fill arguments to change the colors of your bars. Change the theme of your graph using one of the options [here](https://ggplot2.tidyverse.org/reference/ggtheme.html). You will add `theme_xx()` where xx is a theme of your choice.
+
+<br>
+<br>
+<br>
+
+9. Try mapping `species` to the fill argument to see what happens when we do this for a bar graph.
+
+<br>
+<br>
+<br>
+
+10. Outside of the `aes()` function, add `position = "dodge"`. How does this change the graph?
+
+<br>
+<br>
+<br>
+
+11. Think of something you'd like to see graphed with this dataset or the bridges one from our previous activity, and make your own graph. Be sure to add appropriate labels. Try changing the theme, adding color, or combining features.

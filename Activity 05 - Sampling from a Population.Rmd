@@ -1,0 +1,99 @@
+---
+title: "Activity 05 - Sampling from a Population"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 9/9/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We will use the following two R packages for this activity.
+
+```{r}
+library(ggplot2)
+library(moderndive)
+```
+
+Our focus for the upcoming sets of notes has to do with using a sample to make informed conclusions about a population. To be able to do this well, we need to have a good understanding of what happens when we randomly sample from a population.
+
+The `diamonds` dataset in the `ggplot2` package contains 53,940 diamonds. Let's pretend that this is our population and that we don't actually have access to the whole population. Instead, we will take a sample from the population to estimate the population mean diamond price.
+
+1. First as some review... what symbol do we use to represent a population mean? What about for the sample mean?
+
+
+<br>
+
+2. When we take random samples using R, it may be helpful for us to do so in a way that someone else can recreate our exact results. To do this, we set the "seed" where the randomization process will start. Replace the number inside the `set.seed()` function with a number of your choosing. Then use the `rep_sample_n()` function to take a random sample of 50 diamonds.
+
+```{r}
+set.seed(200914)
+diamonds_50 <- rep_sample_n(diamonds, size = 50)
+```
+
+
+<br>
+
+3. Calculate your sample mean price and we will compare numbers across everyone in our class.
+
+```{r}
+
+```
+
+
+<br>
+
+4. Now let's take a sample of 500 diamonds and calculate the sample mean of this new sample. Again we will compare numbers across the class. Run `set.seed()` at the top of this code too with a new seed chosen. You can base your code below on the code from Question 2.
+
+```{r}
+
+```
+
+
+<br>
+
+5. What do you notice about the sample means we got with samples of 50 diamonds vs. with samples of 500 diamonds?
+
+< Put your answer here >
+
+
+<br>
+
+6. Our class only has 10 people (9 students plus Dr. V). It'd be better if we could look at A LOT of random samples. We can do this with the `rep_sample_n()` function using the `reps = __` argument. Let's take 1,000 samples of 50 diamonds, calculate the sample mean for each one, and then make a histogram of our results. We can do this in multiple steps or we can use piping to do it all at once.
+
+```{r}
+
+```
+
+
+<br>
+
+7. Let's do the same thing as above but with 500 diamonds in each of our 1,000 samples.
+
+```{r}
+
+```
+
+
+<br>
+
+8. What do you notice when you compare the two histograms? What is similar about them? What is different?
+
+< Put your answer here >
+
+
+<br>
+
+9. Normally we don't know the population mean (that's why we estimate it), but in this case I can calculate it from the `diamonds` data set. The population mean price is $3,932.80. Where does this number show up in the two graphs you made? How could we use this result to talk about the **standard error** in the two graphs?
+
+< Put your answer here >
+
+
+<br>
+
+10. What do you think your answers to the previous two questions can tell you about random sampling and estimating parameters with statistics? We can explore this idea more with [this link](http://onlinestatbook.com/stat_sim/sampling_dist/).
+
