@@ -1,0 +1,86 @@
+---
+title: "Activity 06 - Resampling from our Sample"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 9/12/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(moderndive)
+library(dplyr)
+```
+
+In the last activity, we saw what happens when we take many random samples from the same population. However, we don't usually have the luxury of doing that. So the question becomes: How can we use a single sample to learn some of the same information we see in the sampling distribution?
+
+1. First as some review... what do we mean by a sampling distribution?
+
+**The distribution of a statistic (e.g. sample means or sample proportions) across all random samples of a certain size from a population.**
+
+
+2. What did we see was true of our sampling distributions in our recent notes/activities?
+
+**The center of the sampling distribution is the parameter associated with our statistic. The bigger the samples we are taking, the closer the sampling distribution looks to a normal distribution (and the smaller the spread of the sampling distribution).**
+
+
+3. One way to learn more about the standard error (i.e. the sampling variability we'd see over many samples) is to perform what is called **bootstrap sampling** or **sampling with replacement** from our own sample. Let's start by generating the same sample of 50 diamonds that you got in our last activity. To do that, you'll use the `set.seed()` function to run the same code that you ran last class. Calculate the mean price of diamonds in your sample to verify it's the same thing you got before.
+
+```{r}
+set.seed(200914)
+diamonds_50 <- rep_sample_n(diamonds, size = 50)
+mean(diamonds_50$price)
+```
+
+
+4. Now let's use our sample to generate 1,000 samples *with replacement* from our original sample (*not* from the population of all diamonds). Each "new sample" will still contain 50 diamonds, but won't be exactly the same as your original sample because you are leaving open the possibility that some diamonds get chosen more than once (or not at all). This will give us a sense of how things could have been a bit different if random chance had given us a slightly different sample. You can use the `rep_sample_n()` function again. This time though you'll add `reps = 1000` and `replace = TRUE`.
+
+```{r}
+diamonds_boot <- rep_sample_n(diamonds_50, size = 50, reps = 1000, 
+                              replace = TRUE)
+```
+
+
+5. Calculate the sample mean price for each of your 1,000 bootstrap samples and make a histogram of the sample mean prices.
+
+```{r}
+diamonds_xbars <- diamonds_boot %>%
+  group_by(replicate) %>%
+  summarize(xbar = mean(price))
+
+ggplot(diamonds_xbars) +
+  geom_histogram(aes(x = xbar), color = "green", binwidth = 100) +
+  geom_vline(xintercept = c(3932.8, mean(diamonds_50$price)), size = 3)
+```
+
+
+6. Is the center of the graph closer to your sample mean or to the population mean ($3,932.80)? Why is this?
+
+**Our graph is centered around our sample mean because these bootstrap resamples were taken from our sample (not from the population).**
+
+**If your original sample mean was below the population mean, the population mean will be somewhere on the right hand side of the graph (and vice versa if it was above the population mean).**
+
+
+7. How does the *spread* of this graph compare to the one we made in Activity 05? You may want to calculate the standard deviation of your sample means. In Activity 05, the standard deviation for our sample means from samples of size 50 was around $560.
+
+```{r}
+sd(diamonds_xbars$xbar)
+```
+
+**In class, some people had values a bit above $560, some had values a bit below $560, but they were all somewhat in that range. This means that any individual bootstrap resampling distribution may not be exactly as spread out as the sampling distribution from the whole population, but it should be somewhat similar.**
+
+
+8. What do you think will happen if you repeat what we've done so far but for your sample of 500 diamonds?
+
+**The sampling distribution for 500 diamonds was narrower, so our bootstrap resampling distribution also would be. It would be centered around our sample mean from that sample of 500.**
+
+
+9. When we use the percentile method for calculating a confidence interval, we find the middle xx% (usually 95%) of our sample means from our bootstrap distribution of sample means. We then claim that we can be 95% confident this range will contain the population mean. Why do you think we can feel comfortable making this claim?
+
+**95% of our bootstrap sample means are in this range. As long as our sample mean from our original sample was within a similar range compared to the population mean (like 95% of sample means are expected to be), our interval will be wide enough to contain the population mean. In some cases (like a particularly large or small original sample mean), our interval will not contain the population mean. We expect this to happen about 5% of the time**
