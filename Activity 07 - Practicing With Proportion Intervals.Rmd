@@ -1,0 +1,173 @@
+---
+title: "Activity 07 - Practicing With Proportion Intervals"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 9/19/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE}
+library(ggplot2)
+library(infer)
+library(dplyr)
+```
+
+For this example, we'll look at a study where researchers trained a dog to smell COVID-19 virus. You can read more about it (and watch a video) [here](https://nerdist.com/article/dogs-sniff-out-covid/).
+
+```{r, out.width = '75%', fig.align = 'center', echo = FALSE, fig.cap = 'Sniffer dog at work'}
+knitr::include_graphics('https://nerdist.com/wp-content/uploads/2020/07/C19-sniffing-dogs-feature-image-07272020.jpg')
+```
+
+# Part 1 - A single proportion
+
+1. I've created a dataset out of the data in the article. You can see it below. How many observations are there? What are the variables and what does each one mean?
+
+```{r}
+covid_dog <- data.frame(ID = c(rep("positive", 157), rep("negative", 792),
+                               rep("positive", 33), rep("negative", 30)),
+                        actual = c(rep("positive", 157), rep("negative", 792),
+                                   rep("negative", 33), rep("positive", 30))) %>%
+  mutate(correct = factor(ID == actual))
+```
+
+**< ANSWER HERE >**
+
+<br>
+
+
+2. Let's start by just looking at cases where the sample was actually positive for COVID-19. Use the `filter()` function to create a new object called `pos_samples` that only includes rows where the actual sample was positive.
+
+```{r}
+
+```
+
+<br>
+
+3. What proportion of positive tests did the dog correctly identify? How can we calculate this in R? (Note: We've seen two ways in the notes and there is a third possibility that uses the functions from the `infer` package)
+
+```{r}
+
+```
+
+**< ANSWER HERE >**
+
+<br>
+
+4. This was just one sample. What we're really interested in is how well this dog would do in the long run. What is our parameter of interest?
+
+**< ANSWER HERE >**
+
+<br>
+
+5. Generate a bootstrap distribution of sample proportions from 1,000 samples. Create a histogram of your 1,000 sample proportions from this distribution. Since we're going to be using randomization, let's set a seed here so that we can reproduce our results in the future. I've gotten you started (but commented out the code so it will knit).
+
+```{r}
+set.seed(107)
+# pos_boot <- pos_samples %>%
+#   specify(formula = ____ ~ NULL, success = "____") %>%
+#   generate(reps = 1000, type = "bootstrap") %>%
+#   calculate(stat = "____")
+# visualize(____)
+```
+
+<br>
+
+6. Create a 95% confidence interval using the method of your choice. Write the interval below.
+
+```{r}
+
+```
+
+**< ANSWER HERE >**
+
+<br>
+
+7. Provide a sentence interpreting your interval in context of this example.
+
+**< ANSWER HERE >**
+
+<br>
+
+8. Suppose we wanted a narrower interval than the one we got. How could we achieve that?
+
+**< ANSWER HERE >**
+
+---
+
+# Part 2- Comparing proportions
+
+9. Now let's consider whether the dog does a better job identifying positive or negative specimens. Before we get started, let's make a graph comparing the two. Fill in the blanks below to create a graph with the actual result on the bottom and the dog's result represented with different colors. Try running the graph with and without `position = fill` to see what that argument does. (Note: Remove `eval = FALSE` to run your code)
+
+```{r, eval = FALSE}
+ggplot(____) +
+  geom_bar(aes(x = ____, fill = ____), position = "fill")
+```
+
+
+<br>
+
+10. What does the graph show? What does `position = fill` do and why might we want to include it here?
+
+**< ANSWER HERE >**
+
+<br>
+
+11. Clearly the dog didn't do equally well with positive and negative cases in our *sample*, but we want to apply this to a *population.* What is our parameter of interest? Put it in context of this problem.
+
+**< ANSWER HERE >**
+
+<br>
+
+12. Let's calculate our point estimate. We can use the `infer` package to do this and just skip the `generate()` step. Write a sentence explaining what the output of this code represents for our example.
+
+```{r}
+dog_pointest <- covid_dog %>%
+  specify(formula = correct ~ actual, success = "TRUE") %>%
+  calculate(stat = "diff in props", order = c("negative", "positive"))
+dog_pointest
+```
+
+**< ANSWER HERE >**
+
+<br>
+
+13. Now we need to generate a bootstrap distribution to better understand how this estimate might vary from sample to sample. You can copy and paste your code from above but change `dog_pointest` to a new name and add a `generate()` line in between `specify()` and `calculate()`. Make a histogram of your sample proportions from this distribution. What do you notice about the histogram?
+
+```{r}
+
+```
+
+**< ANSWER HERE >**
+
+<br>
+
+14. Generate a 95% confidence interval based on this bootstrap distribution. Write your interval below. The interval you get *should* contain only positive numbers. Explain what that means in the context of this example. (Note: You don't have to write a full interpretation of the interval yet. That will come in the next question.)
+
+```{r}
+
+```
+
+**< ANSWER HERE >**
+
+
+<br>
+
+
+15. Interpret the interval in context of the problem. Consider writing the sentence so that it could be included in the article linked at the top of the page and be understood by someone reading that article.
+
+(Reminder: When talking about a difference in percentages, we use "percentage points")
+
+**< ANSWER HERE >**
+
+<br>
+
+
+16. The article mentioned the dog might be able to be used at airports or other locations to determine if someone has COVID-19. What might we need to consider about the applicability of these results outside the context of the experiment?
+
+**< ANSWER HERE >**
