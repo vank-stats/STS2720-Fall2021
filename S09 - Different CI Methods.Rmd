@@ -1,0 +1,128 @@
+---
+title: "Activity 09 - Different Confidence Interval Methods"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 9/29/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+**Note: The `options(scipen = 999)` line below can be added to the hidden code chunk below on an R Markdown document to prevent weird scientific notation formatting when using R outside of code chunks (e.g. `r 2 + 4`)**
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)
+```
+
+```{r, message = FALSE}
+library(ggplot2)
+library(infer)
+library(dplyr)
+library(moderndive)
+```
+
+We've learned three different methods for calculating confidence intervals (percentile, SE, and theory-based). If you're wondering which one you should use, the answer is that it usually doesn't matter much. As we discussed in Notes 9, the three methods all basically...
+
+- are centered at or near your estimate
+- use your sample or bootstrap distribution (which is based on your sample) to estimate a standard error
+- and use a theoretical/bootstrap distribution to account for your level of confidence
+
+Let's use the `house_prices` dataset from the `moderndive` package to illustrate how confidence intervals work.
+
+1. Calculate the mean `price` of the houses and call it `mu_price`. We will consider this the population mean. Write the value you get below your code using proper notation. (Note: Normally we won't know this value, but it will help us illustrate how confidence intervals work)
+
+```{r}
+mu_price <- mean(house_prices$price)
+```
+
+**The population mean price is $\mu =$ `r mu_price %>% round(2)`**
+
+<br>
+
+
+2. I've included code below to take a sample of 50 houses and stored it in an object called `houses_sample`. Calculate the sample mean price of your sample of houses and store it in `xbar_price`. Write the value you get below your code using proper notation. (Note: Change the seed to a number of your own choosing first.)
+
+```{r}
+set.seed(2021929)
+houses_sample <- sample_n(house_prices, size = 50)
+xbar_price <- mean(houses_sample$price)
+```
+
+**The sample mean price is $\bar{x} =$ `r xbar_price %>% round(2)`**
+
+<br>
+
+
+3. If we wanted to make a confidence interval using the theory-based method, we could calculate it with this formula: $\bar{x} \pm t^*_{n-1} * \frac{s}{\sqrt{n}}$ or we can use the `t.test()` function. Let's use R to create a 50% confidence interval and a 90% confidence interval.
+
+```{r}
+theoryci_50 <- t.test(houses_sample$price, conf.level = 0.5)
+theoryci_90 <- t.test(houses_sample$price, conf.level = 0.9)
+```
+
+**50% CI:** (`r theoryci_50$conf.int %>% round(2)`)
+
+**90% CI:** (`r theoryci_90$conf.int %>% round(2)`)
+
+<br>
+
+
+4. Was the population mean (from question 1) inside your 50% interval? What about your 90% interval?
+
+**It was in my 90% CI but not my 50% CI**
+
+**In class, about half of us had $\mu$ in our 50% CI and most of us had $\mu$ in our 90% CI**
+
+<br>
+
+
+5. Let's try making the same two intervals (50% and 90%) using the SE method. We will need to create a bootstrap distribution first.
+
+```{r}
+houses_boot <- houses_sample %>%
+  specify(formula = price ~ NULL) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+visualize(houses_boot)
+
+seci_50 <- get_ci(houses_boot, level = 0.5, type = "se", 
+                  point_estimate = xbar_price)
+seci_90 <- get_ci(houses_boot, level = 0.9, type = "se", 
+                  point_estimate = xbar_price)
+```
+
+**50% CI:** (`r seci_50 %>% round(2)`)
+
+**90% CI:** (`r seci_90 %>% round(2)`)
+
+<br>
+
+
+6. Compare your intervals with this method to your intervals with the theory-based method. Do they have the same center? Are the endpoints similar? Explain why this is.
+
+**The centers are the exact same for all four intervals (the sample mean). The endpoints for the two 50% CIs and for the two 90% CIs are similar. The theory-based method is estimating the standard error based on the sample. The SE method is estimating it based on our bootstrap distribution (created from our sample), so they are reaching similar estimates. The interval formulas are otherwise identical.**
+
+<br>
+
+
+7. Use the bootstrap distribution to generate the same two intervals using the percentile method. Do they have the same center as the other two? Are the endpoints similar? Explain what's going on.
+
+```{r}
+percci_50 <- get_ci(houses_boot, level = 0.5, type = "percentile")
+percci_90 <- get_ci(houses_boot, level = 0.9, type = "percentile")
+```
+
+**50% CI:** (`r percci_50 %>% round(2)`)
+
+**90% CI:** (`r percci_90 %>% round(2)`)
+
+**The bootstrap distribution was a bit right skewed (with one big outlier). This means that our percentile method may give us slightly different intervals than the other two methods. The 90% interval appears to be $10,000 or so different from the other ones.**
+
+<br>
+
+
+---
+
+Since this is the end of your confidence interval discussion (for now), we will use this space to answer any questions you have or review concepts.
