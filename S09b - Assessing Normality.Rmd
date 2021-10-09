@@ -1,0 +1,147 @@
+---
+title: "Activity 09b - Assessing Normality in a Sample"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 10/6/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+```
+
+```{r}
+# Choose settings for graphs and samples
+bins <- 10
+n1 <- 200
+n2 <- 20
+set.seed(1234)
+```
+
+In Notes 9, we learned that some theoretical methods require the condition that the data comes from a population with a normal distribution. When we use these methods we *assume* our data comes from a normal distribution, so it's worth exploring how we decide whether this is or is not a reasonable assumption to make.
+
+Let's start by creating four different "populations". The code below will create a data frame called `population` that will contain four different variables, one for each of these populations..
+
+```{r}
+population <- data.frame(pop1 = rnorm(10000),
+                         pop2 = rt(10000, 5),
+                         pop3 = rexp(10000),
+                         pop4 = rbeta(10000, 5, 1))
+```
+
+
+1. Let's take a sample of `r n1` observations from each population. We can do this using the `sample_n()` function. Below are graphs of our four samples. Which sample(s) do you think come from normal distributions? How are you deciding?
+
+```{r, eval = TRUE}
+sample_200 <- sample_n(population, size = n1)
+g1 <- ggplot(sample_200) +
+  geom_histogram(aes(x = pop1), bins = bins, color = "white")
+g2 <- ggplot(sample_200) +
+  geom_histogram(aes(x = pop2), bins = bins, color = "white")
+g3 <- ggplot(sample_200) +
+  geom_histogram(aes(x = pop3), bins = bins, color = "white")
+g4 <- ggplot(sample_200) +
+  geom_histogram(aes(x = pop4), bins = bins, color = "white")
+grid.arrange(g1, g2, g3, g4, ncol = 2)
+```
+
+**Samples 3 and 4 both have a clearly skewed shape. It seems unlikely that data like this would arise from a normal distribution.**
+
+**Sample 1 has a pretty clear bell shape. There is a slight right skew but not enough to really doubt that this data could come from a normal distribution. Sample 2 also has somewhat of  bell shape but there is one clear outlier, which may suggest the population wasn't quite normally distributed.**
+
+<br>
+
+
+2. What about if our samples each had `r n2` observations instead of `r n1`? Which sample(s) do you think come from normal distributions? How are you deciding?
+
+```{r, eval = TRUE}
+sample_20 <- sample_n(population, size = n2)
+g1 <- ggplot(sample_20) +
+  geom_histogram(aes(x = pop1), bins = bins, color = "white")
+g2 <- ggplot(sample_20) +
+  geom_histogram(aes(x = pop2), bins = bins, color = "white")
+g3 <- ggplot(sample_20) +
+  geom_histogram(aes(x = pop3), bins = bins, color = "white")
+g4 <- ggplot(sample_20) +
+  geom_histogram(aes(x = pop4), bins = bins, color = "white")
+grid.arrange(g1, g2, g3, g4, ncol = 2)
+```
+
+**It's a lot harder to judge distributions when you have 20 values compared to 200. Sample 3 is still pretty clearly skewed and seems unlikely to have come from a normally distributed population. The other three are much less clear.**
+
+**We could say that we will only assume the data is from a normal population if we are very convinced that is true (e.g. sample 1 with 200 observations). Or we could say we will assume it unless we are convinced otherwise and will just make note of any uncertainty we have with the assumption.**
+
+<br>
+
+
+3. Another option is to use a graph called a Q-Q Plot. The Q's stand for quantile. What does this word sound like? What do you think it means?
+
+**Quantile sounds like quartile (which split our data into quarters). Quantiles will split our data into any sort of quantity (e.g. tenths, thirty-seconds, eighteenths, etc.)**
+
+<br>
+
+
+4. A Q-Q plot is like a scatter plot where one axis represents quantiles from our data and the other axis represents quantiles from a normal distribution. Thus, each data point in our sample is plotted against where we would expect that quantile to fall for a normal distribution. If our data is from a normal distribution, we expect the points to fall along a 45 degree line. If not, the points may have a different pattern. Let's try this for our samples of `r n1` observations from our four populations.
+
+```{r, eval = TRUE}
+g1 <- ggplot(sample_200, aes(sample = pop1)) +
+  geom_qq() +
+  geom_qq_line()
+g2 <- ggplot(sample_200, aes(sample = pop2)) +
+  geom_qq() +
+  geom_qq_line()
+g3 <- ggplot(sample_200, aes(sample = pop3)) +
+  geom_qq() +
+  geom_qq_line()
+g4 <- ggplot(sample_200, aes(sample = pop4)) +
+  geom_qq() +
+  geom_qq_line()
+grid.arrange(g1, g2, g3, g4, ncol = 2)
+```
+
+Which of these graph(s) looks *most* like the points fall along a 45 degree line? Which of these graph(s) seem to clearly have a different pattern?
+
+**Sample 1 (top left) has points that fall very close to the line on the graph. This indicates it is pretty reasonable this data came from a normal distribution. Samples 3 and 4 both show pretty clear curved line patterns, suggesting that data is not from a normal distribution. Sample 2 mostly falls along our straight line except at the left hand side where one point in particular is pretty far off. This might suggest the population is close to normal and we have an outlier/unusual value.**
+
+<br>
+
+
+5. The histogram seemed to work OK for bigger sample sizes too. Let's see if the QQ plot works better for smaller samples. We will make a QQ plot for each of our samples of size `r n2`.
+
+```{r, eval = TRUE}
+g1 <- ggplot(sample_20, aes(sample = pop1)) +
+  geom_qq() +
+  geom_qq_line()
+g2 <- ggplot(sample_20, aes(sample = pop2)) +
+  geom_qq() +
+  geom_qq_line()
+g3 <- ggplot(sample_20, aes(sample = pop3)) +
+  geom_qq() +
+  geom_qq_line()
+g4 <- ggplot(sample_20, aes(sample = pop4)) +
+  geom_qq() +
+  geom_qq_line()
+grid.arrange(g1, g2, g3, g4, ncol = 2)
+```
+
+Which of these graph(s) looks *most* like the points fall along a 45 degree line? Which of these graph(s) seem to clearly have a different pattern?
+
+**With the seed I set, sample 2 looked the most like data from a normal distribution. There were still hints of curved patterns in sample 3 and sample 4. Sample 1 had some weird things going on with a couple points at the left and right that didn't fit with the line. We investigated how changing the seed impacted this and found that this may have just been an unusual sample.**
+
+<br>
+
+6. I've set up this document so that you can change the two sample sizes we look at (and the number of bins for the histograms). Try playing around with the different settings a bit. What do you notice?
+
+**With large sample sizes, histograms and QQ plots worked ok for determining if the data came from a population with a normal distribution. With smaller sample sizes, histograms make it very hard to assess normality. QQ plots work better for this. If there is a clear non-linear pattern, we might feel comfortable saying the data doesn't look like it comes from a normal distribution. However, the best we can do in the other direction is to say "this data is consistent with data from a normal distribution". 
+
+<br>
+
+Note: You can explore these ideas more with [this app](https://vank-stats.shinyapps.io/samplehistograms/) as well. The app was made using the Shiny package.
