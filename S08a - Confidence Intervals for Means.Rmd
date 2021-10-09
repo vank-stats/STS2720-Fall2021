@@ -1,0 +1,190 @@
+---
+title: "Activity 08a - Confidence Intervals for Means"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 9/26/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Below are the packages you will need for this activity. If you use other packages, you can add them here.
+
+```{r, message = FALSE}
+library(ggplot2)
+library(infer)
+library(dplyr)
+```
+
+A recent study looked at the effect that fidget spinners have on attention and memory. You can read an article about it [here](https://www.psypost.org/2019/11/study-finds-using-a-fidget-spinner-can-impair-memory-and-attention-54904) or can look at the research paper [here](https://onlinelibrary.wiley.com/doi/full/10.1002/acp.3610) if you're interested.
+
+
+# Looking at the data
+
+1. There is a data file on Moodle called **fidget_spinners.csv** that contains data from the experiment mentioned above. The code below will read the data into R directly from a URL or you can download the file and read it in from your hard drive. Describe the variables in the data.
+
+```{r}
+fidget <- read.csv("https://raw.githubusercontent.com/vank-stats/STS2720-Fall2021/main/fidget_spinners.csv")
+```
+
+
+**There are 7 variables. Condition and Gender are being treated as categorical by R. Everything else is being treated as quantitative, but Participant doesn't have a numeric meaning. There are variables related to the participant's memory and attention scores as well as their age.**
+
+<br>
+
+---
+
+
+# Part 1 - A single mean
+
+2. Let's start by investigating the people in the "No Spinner" group. These people will function like a control group. Use the `filter()` function to create an object called `control` that only contains these participants. Then make a graph of the `MemoryScore` variable for people in this group. Describe what the graph shows.
+
+```{r}
+control <- filter(fidget, Condition == "No Spinner")
+ggplot(control) +
+  geom_histogram(aes(x = MemoryScore), color = "gold3", bins = 12)
+```
+
+**The memory scores range from 0 to 16 or so. Most memory scores are in the 0 to 12 range with higher numbers less common. Scores are fairly uniform in this range. The average is probably around 7 or 8.**
+
+<br>
+
+
+3. Suppose we are interested in the population mean memory score for people not using a fidget spinner. Calculate our best estimate for this number.
+
+```{r}
+control_xbar <- mean(control$MemoryScore)
+```
+
+**Our estimate is $\bar{x} = `r control_xbar`$**
+
+<br>
+
+
+4. Let's create a bootstrap distribution of 1,000 sample means to get a better sense as to how much our estimate would vary from sample to sample. Make a histogram of your bootstrap sample means. (Note: The `set.seed()` line will ensure we get the same result each time we knit our document. You should replace the number with a number of your choosing.)
+
+```{r}
+set.seed(200925)
+control_boot <- control %>%
+  specify(formula = MemoryScore ~ NULL) %>%
+  generate(reps = 1000, method = "boot") %>%
+  calculate(stat = "mean")
+visualize(control_boot) +
+  geom_vline(xintercept = control_xbar, color = "gold3", size = 2) +
+  theme_classic()
+```
+
+<br>
+
+
+5. Describe the histogram you created in the previous example.
+
+**This histogram looks like a normal distribution. It is centered on the sample mean from our sample above and has values ranging from a bit under 5 to around 9. Most value are in the 6 to 8 range.**
+
+<br>
+
+
+6. Create a 90% confidence interval using your bootstrap distribution and write it below.
+
+```{r}
+get_ci(control_boot, level = 0.9, type = "percentile")
+```
+
+**CI: (5.41, 8) **
+
+<br>
+
+
+7. Provide an interpretation of this interval.
+
+**We are 90% confident that the population mean memory score for individuals with no spinner of their own or one present is between 5.41 and 8.**
+
+<br>
+
+---
+
+
+# Part 2 - A difference in means
+
+8. Ultimately, the researchers wanted to know how memory might differ between people using and not using the fidget spinner. Create a new object called `fidget_compare` that contains the "No Spinner" and the "Spinner" groups. (Note: There is a third group called "Spinner Present". You can use `!=` to get rid of that group.)
+
+```{r}
+fidget_compare <- filter(fidget, Condition != "Spinner Present")
+```
+
+<br>
+
+
+9. What type of graph might we use to compare the memory scores of the two groups? Make one below and describe what it shows. (Note: This is based on the data itself, *not* on any sort of bootstrap distribution yet.)
+
+```{r}
+ggplot(fidget_compare) +
+  geom_boxplot(aes(x = MemoryScore, y = Condition)) +
+  theme_bw()
+```
+
+**Among these two groups, memory scores tend to be higher for people in the No Spinner group than those in the Spinner group. The Q1, median, Q3, and max are all higher in the No Spinner group. As one example, 25% of the Spinner group scores above 5 while over 50% of the No Spinner group does this.**
+
+<br>
+
+
+10. Calculate a difference in sample mean memory scores between the two groups. Use "No Spinner" - "Spinner" as the order of subtraction. Write a sentence about what the value you get means in context of this example.
+
+```{r}
+fidget_diffinxbar <- fidget_compare %>%
+  specify(formula = MemoryScore ~ Condition) %>%
+  calculate(stat = "diff in means", order = c("No Spinner", "Spinner"))
+fidget_diffinxbar
+```
+
+**The difference between the two sample means is 2.93. In this context, that means that those in the No Spinner group scored an average of 2.93 points higher on their memory score than those in the Spinner group.**
+
+<br>
+
+
+11. Generate a bootstrap distribution to better understand sampling variability in our estimate. Make a histogram of this distribution and comment on what you see. (Note: The `set.seed()` line will ensure we get the same result each time we knit our document. You should replace the number with a number of your choosing.)
+
+```{r}
+set.seed(92520)
+fidget_boot <- fidget_compare %>%
+  specify(formula = MemoryScore ~ Condition) %>%
+  generate(reps = 1000, type = "boot") %>%
+  calculate(stat = "diff in means", order = c("No Spinner", "Spinner"))
+visualize(fidget_boot) +
+  geom_vline(xintercept = fidget_diffinxbar$stat, color = "plum", size = 2) + 
+  theme_classic()
+```
+
+**The histogram is centered on my sample mean difference of 2.93. It is shaped like a normal distribution and contains values that range from just below 0 to around 6. All but a small number of values are positive, and most values are in the 2 to 5 range.**
+
+<br>
+
+
+12. Calculate a confidence interval for the difference in population means. Write your interval below.
+
+```{r}
+# Confidence level isn't specified, I chose 99%. You could choose something else
+
+get_ci(fidget_boot, level = 0.99, type = "se", 
+       point_estimate = fidget_diffinxbar$stat)
+```
+
+**CI: (0.287, 5.57)**
+
+<br>
+
+
+13. Provide an interpretation of your context interval in context of this example. Does it seem like fidget spinners help (or hurt) memory on average?
+
+**I am 99% confident that the population mean memory score is between 0.287 and 5.57 points higher for people with no spinner involved than for people using a spinner. This suggests I am very confident that using a fidget spinner actually hurts memory scores.**
+
+<br>
+
+
+14. How broadly might we be able to (or not be able to) apply these conclusions? Consider some of the other variables in the study as well as how the study was conducted. (Also do you think this was a random sample? Why or why not?)
+
+**The study included people between the ages of 18 to 25, so we wouldn't want to extend our conclusions beyond these ages. It's also likely these people volunteered for the study rather than being a random selection. Lastly, spinners may work differently for different people. Just because I believe the overall population mean is lower for those with spinners doesn't mean there aren't some groups of people for which that would not be the case.**
