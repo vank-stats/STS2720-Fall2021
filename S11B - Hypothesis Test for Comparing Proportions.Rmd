@@ -1,0 +1,182 @@
+---
+title: "Activity 11B - Hypothesis Test for Comparing Proportions"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 10/16/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE}
+library(ggplot2)
+library(infer)
+library(dplyr)
+```
+
+# COVID-19 Antibodies Example
+
+The example for this activity comes from a [New York Times article](https://www.nytimes.com/2020/08/19/health/coronavirus-fishing-boat.html) about a ship that had a coronavirus outbreak while at sea. Before setting sail, the crew had been tested for COVID-19 antibodies and 3 of the 120 sailors had these antibodies while the other 117 did not. Below is a quote from the article.
+
+> The three sailors confirmed to have neutralizing antibodies did not test positive for the virus during the course of the study; 103 of the remaining 117 became infected. "These numbers may be small, but they’re highly significant", Dr. Greninger said.
+
+We will conduct a hypothesis test to see if we can see what Dr. Greninger means when he says these results are "highly significant".
+
+<br>
+
+
+1. Step 1 - How could we set up our hypotheses based on our likely question of interest? Try doing this both in symbols and in words.
+
+**$H_0: p_1 - p_2 = 0$**
+
+**$H_0: p_1 - p_2 < 0$**
+
+**The null hypothesis is that testing positive for COVID-19 is independent of whether the person has antibodies for it**
+
+**The alternative hypothesis is that people with antibodies are less likely to test positive for COVID-19**
+
+**$p_i$ = the population proportion of people in group i who would test positive for COVID-19 (where i = 1 for people with antibodies and i = 2 for those without)**
+
+<br>
+
+
+2. Step 2 - The data is mentioned at the top of this activity. I've included code to read it into R below. Summarize the data in relation to our question of interest.
+
+```{r}
+ship <- data.frame(antibodies = c(rep("yes", 3), rep("no", 117)),
+                   infected = c(rep("no", 17), rep("yes", 103)))
+ship_diffinphat <- ship %>%
+  specify(formula = infected ~ antibodies, success = "yes") %>%
+  calculate(stat = "diff in props", order = c("yes", "no"))
+ship_diffinphat
+
+ggplot(ship) +
+  geom_bar(aes(x = antibodies, fill = infected)) +
+  theme_dark()
+```
+
+**In our sample the proportion infected was 88 percentage points lower for people with antibodies than those without. The vast majority of those without antibodies were infected while none of the three people with antibodies were infected.**
+
+<br>
+
+
+3. Step 3 - Create a null distribution and visualize it with a p-value shaded in. Then calculate the p-value and write a sentence about what it means in this context.
+
+```{r}
+set.seed(1255)
+ship_null <- ship %>%
+  specify(formula = infected ~ antibodies, success = "yes") %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in props", order = c("yes", "no"))
+
+visualize(ship_null) +
+  shade_p_value(obs_stat = ship_diffinphat, direction = "left")
+
+ship_null %>%
+  get_p_value(obs_stat = ship_diffinphat, direction = "left")
+```
+
+**p-value = 0.003**
+
+**Sentence: In a world where antibodies don't matter for whether someone tests positive for COVID-19, results this extreme would occur only 0.3% of the time. In other words, the data from this ship is not very compatible at all with the null hypothesis that having antibodies is independent of infection chance.**
+
+<br>
+
+
+4. Step 4 - Write a formal conclusion for this example.
+
+**Conclusion: With such a small p-value, we reject the null hypothesis. There is very strong evidence to conclude those with antibodies have a lower population proportion of COVID-19 infection.**
+
+<br>
+
+
+5. Were the results "highly significant"? In other words, are we still able to learn something about the role of antibodies despite only having three people in the group that had them?
+
+**Even though one group only had 3 people, the results would be very unusual in a world where the null hypothesis were true. This can be enough to convince us that the null hypothesis probably isn't true!**
+
+<br>
+
+
+6. Besides the sample size, are there any other reasons we may want to be cautious about attributing the whole difference we're seeing to whether the person had antibodies or not?
+
+**This was an observational study, not an experiment. It's entirely possible that the people with antibodies will act differently than people without. For example, they have antibodies because they were previously infected with COVID-19. This might cause them to take more precautions or to socialize differently than they might otherwise.**
+
+<br>
+
+
+---
+
+# Extra practice - Hydroxychloroquine Example
+
+Last year a study was conducted looking at the efficacy of hydroxychloroquine in reducing the likelihood of contracting COVID-19. A link to the study is [here](https://www.nejm.org/doi/pdf/10.1056/NEJMoa2016638?articleTools=true). (Note: This example is looking at just one small part of a much larger study.)
+
+1. Step 1 - What hypotheses should researchers use to test whether fewer people will test positive when taking hydroxychloroquine compared to a placebo? Be sure to define your parameters.
+
+**$H_0: p_1 - p_2 = 0$**
+
+**$H_a: p_1 - p_2 < 0$**
+
+**$p_i$ = the population proportion of people who test positive for COVID-19 (where i = 1 for people taking hydroxychloroquine and i = 2 for the placebo)**
+
+<br>
+
+
+2. Step 2 - In the study, 49 of the 414 subjects taking hydroxychloroquine became infected with COVID-19. 58 of the 407 subjects taking the placebo became infected. Code to read in the data is below. Create a summary of the data that is relevant to this problem. (Bonus: What sort of graph might we want to look at?)
+
+```{r}
+study <- data.frame(treatment = c(rep("hydroxy", 414), rep("placebo", 407)),
+                    infected = c(rep("yes", 49), rep("no", 414 - 49),
+                                 rep("yes", 58), rep("no", 407 - 58)))
+
+study_diffinphat <- study %>%
+  specify(formula = infected ~ treatment, success = "yes") %>%
+  calculate(stat = "diff in props", order = c("hydroxy", "placebo"))
+study_diffinphat
+
+ggplot(study) +
+  geom_bar(aes(x = treatment, fill = infected), position = "fill") +
+  theme_minimal()
+```
+
+The group who took hydroxycholorquine had a 2.4 percentage point lower rate of COVID-19 infection than the group taking the placebo.
+
+<br>
+
+
+3. Step 3 - Use the `infer` package to create a null distribution and to calculate a p-value.
+
+```{r}
+set.seed(1255)
+study_null <- study %>%
+  specify(formula = infected ~ treatment, success = "yes") %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in props", order = c("hydroxy", "placebo"))
+
+visualize(study_null) +
+  shade_p_value(obs_stat = study_diffinphat, direction = "left")
+
+study_null %>%
+  get_p_value(obs_stat = study_diffinphat, direction = "left")
+```
+
+**In a world where hydroxychloroquine works just as well as a placebo, we would see it outperform the placebo by this much in our sample about 17% of the time. This tells us this data is compatible with the null model that says the drug is not working to reduce COVID-19 infection**
+
+<br>
+
+
+4. Step 4 - Write a formal conclusion in context of the problem. Use $\alpha = 0.05$.
+
+**Conclusion: Our p-value > 0.05, so we fail to reject the null hypothesis. There is insufficient evidence to claim hydroxychloroquine reduces the population proportion of people who test positive for COVID-19.**
+
+<br>
+
+
+5. The authors of the paper say that the study was only designed with sufficient power to find a reduction of at least 50 percent. What do you think this means? What do you think researchers do to make a test "powerful" enough to detect smaller differences?
+
+**This tells us that they only expected to be able to reject the null if the hydroxychlororquine group reduced infection by 50% (e.g. from 14% down to 7%). If the true impact is smaller than this, this experiment is unlikely to detect it. Increasing the sample size can make a test more powerful.**
