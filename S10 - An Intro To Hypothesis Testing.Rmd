@@ -1,0 +1,88 @@
+---
+title: "Activity 10 - An Introduction to Hypothesis Testing"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 10/16/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+To begin, go read the article called "What Is A P-Value Anyway?". Pay special attention to the toothbrushing example at the beginning. You will apply the four hypothesis test steps to this example.
+
+# Part One - Toothbrushing Example
+
+1. **Step One**: What are the two competing hypotheses? Which should be the null hypothesis and which should be the alternative hypothesis?
+
+**$H_0$: The son brushed his teeth**
+
+**$H_a$: The son did not brush his teeth**
+
+
+<br>
+
+
+2. **Step Two**: What is the data / evidence in this example?
+
+**The son's toothbrush was dry**
+
+
+<br>
+
+
+3. **Step Three**: How likely/unlikely would this data/evidence be if the null hypothesis were true? In other words, how big will our p-value be?
+
+**It would be very unlikely to have a completely dry toothbrush if the son brushed his teeth. This suggests our p-value would be small (if we were able to calculate one). Our data/evidence was not very compatible with the null hypothesis.**
+
+
+<br>
+
+
+4. **Step Four**: What conclusion can we reach? While we don't have an actual p-value or significance level ($\alpha$), you can pretend that $p-value < \alpha$.
+
+**Conclusion: Because of our small p-value, we will reject the null hypothesis. There is sufficient evidence to conclude the son did not brush his teeth.**
+
+**Note: We don't know for sure the son didn't brush his teeth (e.g. son used someone else's toothbrush or a hair dryer dried the toothbrush), but based on what we've seen it seems reasonable to conclude he didn't brush his teeth.**
+
+<br>
+
+
+---
+
+
+# Part Two - The Lady Tasting Tea
+
+1. **Step One**: What were the two hypotheses in the lady tasting tea example? Which would be the null hypothesis and which would be the alternative hypothesis?
+
+**$H_0$: Dr. Bristol is guessing whether milk was added first/last**
+
+**$H_a$: Dr. Bristol has some ability to tell whether milk was added first/last**
+
+
+<br>
+
+2. **Step Two**: What is the data / evidence in this example?
+
+**She correctly identified all eight of the cups she was given. We might summarize our data by saying $\hat{p} = 1$**
+
+
+<br>
+
+
+3. **Step Three**: What did we see about how likely/unlikely the data was if the null hypothesis were true? In other words, how big was our p-value be?
+
+**Our p-value would be very small. It is unusual to correctly identify all eight cups if you are guessing at random. Through simulation, this happened less than 1% of the time by chance.**
+
+
+<br>
+
+
+4. **Step Four**: What conclusion can we reach? Assume that our significance level was $\alpha = 0.10$.
+
+**Conclusion: We can reject the null hypothesis because our p-value < 0.1. We have very strong evidence to conclude Dr. Bristol has some ability to tell whether milk was added before/after tea.**
+
+<br>
