@@ -1,0 +1,156 @@
+---
+title: "Activity 11A - Hypothesis Test for a Proportion"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 10/16/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE}
+library(ggplot2)
+library(infer)
+library(dplyr)
+```
+
+The best way to get more comfortable with conducting hypothesis tests is to practice. 
+
+Let's suppose that we're interested in studying the concept of home field advantage in Major League Baseball last season. If there's no such thing as home field advantage, the home team will win just as often as the away team (half the time). If there *is* an advantage to the home team, they will win over half the time. To carry out this test, I will use a significance level of $\alpha = 0.10$.
+
+<br>
+
+1. Step 1 - Write out our null and alternative hypotheses below. Define $p$ in this specific example.
+
+**$H_0: p = 0.5$**
+
+**$H_A: p > 0.5$**
+
+**p = the population proportion of games the home team wins**
+
+<br>
+
+
+2. Step 2 - I gathered data from two random dates, which you can read into R below. Summarize this data in context of this problem.
+
+```{r}
+mlbgames <- data.frame(date = c(rep("8/21/20", 14), rep("9/7/20", 11)),
+                       winner = c("H", "A", "A", "A", "H",
+                                  "H", "H", "H", "H", "H",
+                                  "H", "A", "A", "A",
+                                  "H", "A", "A", "A", "H",
+                                  "H", "H", "H", "H", "H",
+                                  "H"))
+mlb_phat <- mlbgames %>%
+  specify(formula = winner ~ NULL, success = "H") %>%
+  calculate(stat = "prop")
+mlb_phat
+```
+
+$\hat{p} = 0.64$
+
+<br>
+
+
+3. Step 3 - Use the `infer` package to create a null distribution and shade in your p-value on the picture. Then calculate the p-value and write a sentence about what the p-value means for this specific example. (Note: You aren't giving a formal conclusion yet.)
+
+```{r, eval = TRUE}
+set.seed(2468)
+mlb_nulldist <- mlbgames %>%
+  specify(formula = winner ~ NULL, success = "H") %>%
+  hypothesize(null = "point", p = 0.5) %>%
+  generate(reps = 1000, type = "simulate") %>%
+  calculate(stat = "prop")
+
+visualize(mlb_nulldist) +
+  shade_p_value(obs_stat = mlb_phat, direction = "right")
+
+mlb_nulldist %>%
+  get_p_value(obs_stat = mlb_phat, direction = "right")
+```
+
+**p-value = 0.129**
+
+**Sentence: In a world without home field advantage, the home team would win 64% or more of their games (in a random sample of 25 games) about 13% of the time. In other words, even though the home team really did win more than half the games in our sample, this data is compatible with the null hypothesis (in addition to the alternative hypothesis).**
+
+<br>
+
+
+4. Step 4 - Write a formal conclusion based on your p-value.
+
+**Conclusion: Since our p-value > $\alpha = 0.10$, we fail to reject the null hypothesis. There is not enough evidence from this sample to conclude that home teams win more than half their games overall.**
+
+<br>
+
+
+5. Write a couple sentences about why we reached this conclusion. Do you think it's possible we're "wrong"? What could we do to feel more confident in our answer?
+
+**We began our test by assuming the null hypothesis was true (that home teams win half the time), and the data we saw was compatible with this hypothesis. Thus, this wasn't enough evidence for us to change our minds.**
+
+**We only looked at 25 games. It's possible that with a bigger sample, we might feel confident that home field advantage exists.**
+
+<br>
+
+---
+
+6. Want extra practice? Try to repeat this process for NBA games last season (before their COVID-19 bubble started). Below is data collected from two random dates last NBA season.
+
+```{r}
+nbagames <- data.frame(date = c(rep("1/11/20", 7), rep("2/23/20", 7)),
+                       winner = c("H", "H", "A", "A", "H", "H", "H",
+                                  "H", "H", "A", "H", "H", "H", "H"))
+```
+
+**STEP 1 -- Write out our hypotheses**
+
+**$H_0: p = 0.5$**
+
+**$H_A: p > 0.5$**
+
+**p = the population proportion of games the home team wins in the NBA**
+
+<br>
+
+**STEP 2 -- Gather data and summarize it**
+
+```{r}
+nba_phat <- nbagames %>%
+  specify(formula = winner ~ NULL, success = "H") %>%
+  calculate(stat = "prop")
+nba_phat
+```
+
+$\hat{p} =$ `r nba_phat$stat`
+
+<br>
+
+**STEP 3 -- Compare data to $H_0$**
+
+```{r, eval = TRUE}
+nba_nulldist <- nbagames %>%
+  specify(formula = winner ~ NULL, success = "H") %>%
+  hypothesize(null = "point", p = 0.5) %>%
+  generate(reps = 1000, type = "simulate") %>%
+  calculate(stat = "prop")
+
+visualize(nba_nulldist) +
+  shade_p_value(obs_stat = nba_phat, direction = "right")
+
+nba_pval <- nba_nulldist %>%
+  get_p_value(obs_stat = nba_phat, direction = "right")
+```
+
+**p-value = `r nba_pval`**
+
+**Sentence: In a world without home field advantage in the NBA, the home team would win 78.6% or more of their games (in a random sample of 14 games) only 3% of the time. In other words, even though we only looked at 14 games, this data is not very compatible with the null hypothesis.**
+
+<br>
+
+**STEP 4 -- Conclusion**
+
+**Conclusion: Since our p-value < $\alpha = 0.10$, we reject the null hypothesis. There is sufficient evidence from this sample to conclude that home teams win more than half their games overall in the NBA.**
+
