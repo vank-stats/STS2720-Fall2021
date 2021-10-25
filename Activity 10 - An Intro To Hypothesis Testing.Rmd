@@ -1,0 +1,87 @@
+---
+title: "Activity 10 - An Introduction to Hypothesis Testing"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 10/16/2021'
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+To begin, go read the article called "What Is A P-Value Anyway?". Pay special attention to the toothbrushing example at the beginning. You will apply the four hypothesis test steps to this example.
+
+# Part One - Toothbrushing Example
+
+1. **Step One**: What are the two competing hypotheses? Which should be the null hypothesis and which should be the alternative hypothesis?
+
+**$H_0$: **
+
+**$H_a$: **
+
+
+<br>
+
+
+2. **Step Two**: What is the data / evidence in this example?
+
+**ANSWER**
+
+
+<br>
+
+
+3. **Step Three**: How likely/unlikely would this data/evidence be if the null hypothesis were true? In other words, how big will our p-value be?
+
+**ANSWER**
+
+
+<br>
+
+
+4. **Step Four**: What conclusion can we reach? While we don't have an actual p-value or significance level ($\alpha$), you can pretend that $p-value < \alpha$.
+
+**Conclusion: **
+
+
+<br>
+
+
+---
+
+
+# Part Two - The Lady Tasting Tea
+
+1. **Step One**: What were the two hypotheses in the lady tasting tea example? Which would be the null hypothesis and which would be the alternative hypothesis?
+
+**$H_0$: **
+
+**$H_a$: **
+
+
+<br>
+
+2. **Step Two**: What is the data / evidence in this example?
+
+**ANSWER**
+
+
+<br>
+
+
+3. **Step Three**: What did we see about how likely/unlikely the data was if the null hypothesis were true? In other words, how big was our p-value be?
+
+**ANSWER**
+
+
+<br>
+
+
+4. **Step Four**: What conclusion can we reach? Assume that our significance level was $\alpha = 0.10$.
+
+**Conclusion: **
+
+<br>
