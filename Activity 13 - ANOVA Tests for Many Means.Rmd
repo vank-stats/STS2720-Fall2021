@@ -1,0 +1,164 @@
+---
+title: "Activity 13 - ANOVA Tests for Many Means"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 10/26/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(infer)
+library(dplyr)
+```
+
+
+# Example - Fidget spinners
+
+In the fidget spinner example at the end of our last activity, I removed the group that was actively using the fidget spinner. However, that group was likely a key part of the experiment. Now that we've learned above ANOVA tests, let's conduct a hypothesis test to compare the population mean memory scores of *all three groups*. We will use $\alpha = 0.1$ for our hypothesis test.
+
+
+1. **Step 1** - Write out our hypotheses
+
+Write out the appropriate hypotheses to conduct an ANOVA hypothesis test for this problem.
+
+$H_0:$
+
+$H_A:$
+
+
+<br>
+
+2. **Step 2** - Gather and summarize data
+
+There is code below to read the data in from our course GitHub repository. Generate an appropriate graph to compare the `MemoryScore`'s for the three groups.
+
+```{r}
+fidget <- read.csv("https://raw.githubusercontent.com/vank-stats/STS2720-Fall2021/main/fidget_spinners.csv")
+
+```
+
+Use the `infer` package to calculate an F statistic for this data. What does the value we calculate mean in this context?
+
+```{r}
+
+```
+
+$F =$
+
+**Interpretation of F: **
+
+
+<br>
+
+3. **Step 3** - Compare the data to $H_0$
+
+Use the `infer` package to generate a null distribution of F values. Visualize your p-value on the distribution.
+
+```{r}
+
+```
+
+Calculate the p-value and write a sentence explaining what it means in context.
+
+```{r}
+
+```
+
+$p-value =$
+
+**P-value Interpretation: **
+
+
+
+<br>
+
+4. **Step 4** - Reach a conclusion
+
+**Conclusion:**
+
+
+
+<br>
+
+---
+
+# Simultaneous Confidence Intervals
+
+If we concluded that there is a difference between at least some of the population means, our next step should be to determine *which* groups are different. We'll do this with confidence intervals, but there's a catch...
+
+- Before getting into confidence intervals. Let's suppose I plan to flip a fair coin. How confident can I be that it will come up heads?
+
+
+<br>
+
+- If I flip two coins, how confident can I be that *both* will come up heads? What about with three coins?
+
+
+<br>
+
+- We can compare this to confidence intervals. If I make two 90% confidence intervals (for example), I can't be 90% confident that they are *both* correct. How confident am I? What about with three 90% confidence intervals?
+
+
+<br>
+
+
+
+### Bonferroni's Adjustment
+
+For our ANOVA test we did, we will need to make three confidence intervals. (Group 1 - Group 2, Group 1 - Group 3, and Group 2 - Group 3). In general, we can talk about confidence intervals as $(1-\alpha)*100\%$ intervals. Something called **Bonferroni's method** can be used to help us choose a new $\alpha$ that will make it so we can be 90% confident *overall*.
+
+$$\text{Bonferroni's method}: \alpha^* = \frac{\alpha}{m}$$
+
+where $\alpha$ is our overall significance level and $m$ is the number of intervals we will make.
+
+(Note: While it's called Bonferroni's method, it was statistician [Olive Jean Dunn](https://en.wikipedia.org/wiki/Olive_Jean_Dunn) who first discovered the application to confidence intervals.)
+
+<br>
+
+5. What will $\alpha^*$ be if we make three intervals and want to be 90% confident overall? How confident will we be in the individual intervals?
+
+```{r, eval = FALSE}
+alphastar <- 
+```
+
+
+<br>
+
+6. Verify that we can be 90% confident in all three intervals together.
+
+
+<br>
+
+Unfortunately, there isn't a convenient simultaneous CI method in the `infer` package using simulation (or built into R). We can use the `descTools` package to generate theory-based versions of these CIs though. Install this package in your R console then run the code below.
+
+```{r, eval = FALSE}
+library(DescTools)
+fidget_anova <- aov(MemoryScore ~ Condition, data = fidget)
+PostHocTest(fidget_anova, conf.level = 0.9, method = "bonferroni")
+```
+
+7. Which group(s) can we be 95% confident have different population means from one another? Justify your answer.
+
+**ANSWER**
+
+<br>
+
+
+8. Can we be 95% confident one group has the highest population mean? What about the lowest? Justify your answer.
+
+**ANSWER**
+
+<br>
+
+
+9. What might our overall conclusion look like? Try writing one out that incorporates the information that we've learned from the fidget dataset.
+
+**ANSWER**
+

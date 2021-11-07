@@ -1,0 +1,259 @@
+---
+title: "Activity 13B - An Introduction to Chi Squared Tests"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 10/27/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(infer)
+library(dplyr)
+```
+
+
+# Background + Handedness/Season Example
+
+We saw in our last set of notes that the ANOVA test can be used to compare many population means to one another. To do this, we used a new kind of test statistic called an $F$ statistic. In this activity, we'll learn about something called a Chi-Squared Test that lets us explore whether two categorical variables are related to one another.
+
+[Here](https://cran.r-project.org/web/packages/infer/vignettes/chi_squared.html) is a page about using the `infer` package with Chi-Squared tests.
+
+In a previous semester, I had students fill out a survey with many questions. For the rest of this explanation, we'll explore whether there is a relationship between handedness and season someone was born.
+
+
+## Step 1 - Hypotheses
+
+In a Chi-squared test, our hypotheses will generally look like:
+
+> $H_0:$ There is no relationship between our two categorical variables
+
+> $H_A:$ There is some sort of relationship between our two categorical variables
+
+<br>
+
+For my example above, I would write these in context of my question of interest.
+
+> $H_0:$ 
+
+> $H_A:$ 
+
+<br>
+
+
+
+## Step 2 - Gathering and summarizing our data
+
+When we have data from two categorical variables, we can arrange the data in a table that shows us the number of people / objects in each combination of our groups.
+
+Below is an example for the handedness/season data from my class. I've used the `table()` function to display the data in a table.
+
+```{r}
+example <- data.frame(season = c(rep("Fall", 7), rep("Spring", 10),
+                                 rep("Summer", 19), rep("Winter", 15)),
+                      handedness = c("Left", rep("Right", 6),
+                                     "Left", rep("Right", 9), 
+                                     "Both", "Left", rep("Right", 17),
+                                     "Both", rep("Left", 3), rep("Right", 11)))
+
+table(example$season, example$handedness)
+```
+
+We can also look at this visually by comparing the handedness across the seasons. We did something similar when we compared proportions across two groups (which was really a simplified version of a Chi-Squared test where both variables had two groups).
+
+What kind of graph could we create to visualize this data? Create one below...
+
+```{r}
+## Create a graph to compare our two categorical variables
+```
+
+Like with the ANOVA test, we'll summarize our data using a single test statistic, something called a $\chi^2$ statistic. This statistic compares what we *observed* in our table to what we would *expect* if $H_0$ were true. To do this, we create a new table of "expected counts". Each cell in this new table can be calculated using the following formula.
+
+
+<br>
+
+$$\text{Expected count} = \frac{\text{row total} * \text{column total}}{\text{overall total}}$$
+<br>
+
+
+There is a function called `chisq.test()` that can calculate the expected counts for us.
+
+```{r}
+chisq.test(example$season, example$handedness)$expected
+```
+
+<br>
+
+
+Let's verify the 12.65 from the bottom right corner of our table.
+
+```{r}
+
+```
+
+<br>
+
+
+Once we have our table of expected counts, we'll compare the cells of our two tables: the one of what we actually saw to the one of what we expect (if $H_0$ is true). 
+
+Our statistic has this formula:
+
+$$\chi^2 = \sum \frac{(Obs - Exp)^2}{Exp}$$
+
+<br>
+
+
+You can think of this equation as doing the following:
+
+* Comparing what we saw to what we expected if the null model were true (Obs - Exp)
+* Squaring that value so that our positives and negatives don't just cancel out
+* Dividing by the expected count to "standardize" things. In other words, being off by 5 is a bigger deal if we expected a count of 1 than if we expected a count of 100.
+* Adding this value together for each cell to get an overall measure of how much our data differed from what we expected on average.
+
+<br>
+
+
+We can calculate this value using the `chisq.test()` function
+
+```{r}
+chisq.test(example$season, example$handedness)$statistic
+```
+
+or using the `infer` package.
+
+```{r}
+example_chisq <- example %>%
+  specify(formula = handedness ~ season) %>%
+  calculate(stat = "Chisq")
+example_chisq
+```
+
+<br>
+
+
+Even though we've already compared our data to what the null model says we "expect", we don't have context yet about whether 2.97 is an unusual value or not. We'll generate a null distribution for that.
+
+(Note: The warning message you see when using `chisq.test()` is telling us that a theory based approach wouldn't be appropriate here. This is because we should have at least 5 observations in most cells of our expected counts table for the theory approach to work properly.)
+
+<br>
+
+
+
+## Step 3 - Comparing our data to $H_0$
+
+We can use the `infer` package to generate a null distribution of chi-squared values. 
+
+```{r}
+set.seed(2468)
+example_boot <- example %>%
+  specify(formula = handedness ~ season) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "Chisq")
+visualize(example_boot)
+```
+
+<br>
+
+
+Just like with the ANOVA test, our test statistics will be small if the null hypothesis is true (observed values close to expected values) and large if the alternative hypothesis is true (observed values further away from expected values). This means we'll obtain a p-value by shading everything **to the right** of the test statistic we observed.
+
+```{r}
+visualize(example_boot) +
+  shade_p_value(obs_stat = example_chisq, direction = "right")
+
+example_boot %>%
+  get_p_value(obs_stat = example_chisq, direction = "right")
+```
+
+<br>
+
+
+It looks like our test statistic wouldn't be unusual at all if there's no relationship between handedness and season of birth.
+
+<br>
+
+
+
+## Step 4 - Conclusions
+
+Our conclusions will be made just like with previous hypothesis tests. We'll compare our p-value to $\alpha$ (use 0.05 if not specified). If $p-value < \alpha$ we reject $H_0$ and have sufficient evidence $H_A$ is true. If $p-value > \alpha$ we fail to reject $H_0$ and have insufficient evidence $H_A$ is true. We will want to put our conclusion in context of our specific problem too.
+
+> **Conclusion: **
+
+
+---
+
+# Example: Is college "worth it"?
+
+We previously looked at this data by simplifying things to either a "yes" or "no" response. In reality, respondents could say "definitely" or "probably" before either of those options. 
+
+As a reminder, the Elon Poll contacted a random sample of recent college graduates (34 or younger) to ask if they thought college was "worth it" for them. They also recorded whether the person was a first generation student or not. Suppose we're interested in whether or not there's a relationship between these two variables. We can do a Chi-Squared Test!
+
+
+## Step 1: Writing our two hypotheses
+
+Let's write out our two hypotheses in context of this example
+
+> $H_0:$
+
+> $H_A:$
+
+<br>
+
+
+
+## Step 2: Gathering and summarizing our data
+
+Below is some code to read in the data and to view it in a table:
+
+```{r}
+college <- data.frame(worthit = factor(c(rep("def_yes", 263), rep("prob_yes", 197),
+                                  rep("prob_no", 90), rep("def_no", 47),
+                                  rep("def_yes", 527), rep("prob_yes", 331),
+                                  rep("prob_no", 88), rep("def_no", 29))),
+                      firstgen = c(rep("yes", 263 + 197 + 90 + 47),
+                                   rep("no", 527 + 331 + 88 + 29)))
+table(college$worthit, college$firstgen)
+```
+
+Let's make a graph to view this data too.
+
+```{r}
+
+
+```
+
+Calculate a $\chi^2$ statistic using `chisq.test()` or the `infer` package.
+
+```{r}
+
+```
+
+<br>
+
+
+
+## Step 3 - Comparing our data to $H_0$
+
+Generate a null distribution and display it on a graph with the p-value shaded. Then calculate the p-value and write a sentence explaining what the number means in context.
+
+```{r}
+
+```
+
+**Sentence:**
+
+<br>
+
+
+
+## Step 4 - Reaching a conclusion
+
+**Conclusion:**
