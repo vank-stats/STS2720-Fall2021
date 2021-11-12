@@ -1,0 +1,278 @@
+---
+title: "Activity 15A - Correlation and Scatterplots"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 11/7/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+We will use the following R packages during today's activity.
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(infer)
+```
+
+---
+
+The data for this activity comes from [this article](https://www.washingtonpost.com/business/2020/10/23/pandemic-data-chart-masks/), which looked at US states and the relationship between (i) the percentage of people who claim to wear masks most of the time in public and (ii) the percentage of people who know someone with COVID symptoms. The article was from October 2020.
+
+This example involves considering the relationship that two quantitative variables have with one another. We'll first talk about using **scatterplots** to graph this relationship and then using **correlation** and eventually **regression** to describe it.
+
+You can find the data on our course GitHub page.
+
+```{r}
+masks <- read.csv("https://raw.githubusercontent.com/vank-stats/STS2720-Fall2021/main/masks_covid.csv")
+```
+
+
+---
+
+# Scatterplots
+
+Scatterplots are a way for us to visualize relationships between two quantitative variables. We've seen the terms *response* and *explanatory* throughout the semester when using the `specify()` function in the `infer` package. 
+
+Recall that a **response variable** is the variable we're trying to understand, and the **explanatory variable** is the one that we think helps us explain that variable. In a scatterplot, we will put our explanatory variable on the x axis and our response variable on the y axis.
+
+
+<br>
+
+**Question:** The graph at the top of the article is a scatterplot. Why do you think they chose to put those variables on the x and y axis instead of swapping them?
+
+**Answer: We might think that the percentage of people regularly wearing masks in public can help us explain the percentage of people who know someone with COVID-19 symptoms (our response).**
+
+<br>
+
+
+## Scatterplots using `ggplot2`
+
+In R, we can use `geom_point()` with a `ggplot()` object to create a scatterplot. We will need to map one variable to the x aesthetic and one variable to the y aesthetic.
+
+Let's try to recreate the graph from the article.
+
+```{r, eval = TRUE}
+ggplot(masks) +
+  geom_point(aes(x = Masks_Pct, y = Symptoms_Pct))
+```
+
+Each dot on the graph represents one observation (or state in this case). We can tell a state's value for each variable by looking at where it is situated along the x and y axis.
+
+Like with other graph types we've used, we can add features to scatterplots. Notice that the graph in the article has points colored by what region they are in. See if you can figure out how to add this to your graph.
+
+```{r, eval = TRUE}
+ggplot(masks) +
+  geom_label(aes(x = Masks_Pct, y = Symptoms_Pct, label = `State`,
+                 fill = Region), alpha = 0.5) +
+  scale_fill_manual(values = c("goldenrod", "darkseagreen", "pink", "lightblue")) +
+  theme_bw() +
+  labs(x = "Percentage of people wearing masks in public all or most of the time",
+       y = "Percentage of people who know \n someone with covid-19 symptoms")
+```
+
+**Bonus:** If you want to get even closer to recreating the graph in the article, you can use `geom_label()` instead of `geom_point()` and assign `State` to the `label` aesthetic. You can also use `scale_xx_manual()` to choose the specific colors to use for an aesthetic. Just replace xx with color or fill depending on which one you used.)
+
+<br>
+
+
+## Reading scatterplots
+
+Scatterplots can tell us three main things about our data:
+
+1. The form of the relationship
+   - The **form** could be described many ways, but for now we'll stick with "linear" or "non-linear". In other words, do the points roughly follow a straight line pattern or is there some other type of pattern?
+  
+2. The direction of the relationship
+   - The **direction** of the relationship can be "positive", "negative", or "neither".
+  
+3. The strength of the relationship
+   - The **strength** of the relationship is based on how closely the points follow a pattern. This can range from very weak, to very strong, or anything in between.
+
+**Note: We should also keep an eye out for any outliers that might impact the analysis we do for this data**
+
+<br>
+
+**Question:** What do you think determines whether the direction is "positive", "negative", or "neither"?
+
+**Answer: This is based on the slope of the line/pattern. If points generally go up as we move from left to right, we call that positive (positive slope). If points generally go down as we move from left to right, we call that negative (negative slope). If there's consistent positive/negative slope we say the direction is not positive or negative.**
+
+<br>
+
+**Practice:** Describe the relationship for the graph from the article that we re-created.
+
+- Form: Linear
+- Direction: Negative
+- Strength: Fairly strong
+- Any outliers?: Wyoming would be pretty far off from a line that we would draw through the data.
+
+<br>
+
+
+---
+
+# Correlation
+
+While we can do an OK job describing the relationship we see for someone, statisticians like to quantify things when possible. 
+
+We can use the **correlation coefficient** to describe the *strength* and *direction* of a linear relationship. 
+
+(Note: This means that the correlation isn't a useful measurement if the variables don't have a linear relationship). 
+
+We write the correlation coefficient for a sample as $r$ and the correlation coefficient for a population as $\rho$ (the Greek letter rho).
+
+Go to [this link](http://robertgrantstats.co.uk/drawmydata.html) and see if you can use it to answer the following questions. You can click on the graph to draw dots for a scatterplot, and it will tell you the correlation of those points. Hit "Clear data" if you want to start a new graph.
+
+* When all data lie on a perfectly straight line with positive slope, r = 1
+* When all data lie on a perfectly straight line with negative slope, r = -1
+* When there is basically no relationship between x and y, $r \approx$ 0
+* Based on this, correlation values must be between -1 and 1
+* If the absolute value of r is close to 1, the strength of the linear relationship is strong
+* If the absolute value of r is close to 0, the strength of the linear relationship is weak
+* See if you can draw a couple different types of pictures that have correlations close to 0. What do they look like?
+
+**There are lots of possible answers including random scatter, parallel horizontal lines, parabola, sine curve, etc.**
+
+
+<br>
+
+* Does the correlation coefficient seem to be affected by outliers? Try a couple different types of outliers.
+
+**It can be GREATLY impacted! In some cases you can go from very weak to very strong or from positive to negative even.**
+
+
+<br>
+
+* The article from the beginning of this activity mentions that "correlation does not equal causation". What does this mean?
+
+**When we find a strong correlation (positive or negative) that doesn't necessarily mean one variable is having an impact on the other (although it might be!).**
+
+
+<br>
+
+Note: In addition to the things above, the correlation coefficient doesn't change if you switch your x and y variables with one another or if you change the units of measurement (e.g. pounds instead of kilograms)
+
+<br>
+
+
+
+## Computing the correlation
+
+We can use the `infer` package or the `cor()` function. Below is code to calculate the sample correlation using the `specify()` and `calculate()` functions below. You'll use `stat = "correlation"`.
+
+```{r}
+masks %>%
+  specify(formula = Symptoms_Pct ~ Masks_Pct) %>%
+  calculate(stat = "correlation")
+```
+
+The arguments for the `cor()` function are two vectors. Below is an example of using that function. 
+
+```{r}
+cor(masks$Symptoms_Pct, masks$Masks_Pct)
+```
+
+**Review**: Why did I need to include dollar signs?
+
+**In the cor() function (and many other base R functions), we don't have a way to specify the dataset itself, so we are specifying the two variables separately.**
+
+<br>
+
+
+Whichever method we use, we get $r = -0.85$. 
+
+
+<br>
+
+**Question:** What does this number tell us about the relationship between our two variables?
+
+**Answer: The negative sign says there is a negative direction (as mask percent increases, symptoms percent tends to decrease) and the relationship is pretty strong (close to -1).**
+
+<br>
+
+
+---
+
+# Hypothesis tests / confidence intervals
+
+We can create confidence intervals or carry out hypothesis tests for the population correlation too. Let's see if we can figure out how to do this for this example.
+
+## Hypothesis test for a correlation
+
+What would our hypotheses be?
+
+$H_0: \rho = 0$
+
+$H_A: \rho \ne 0$
+
+
+<br>
+
+
+We already used the infer package to describe our sample. Let's try generating a null distribution.
+
+```{r, eval = TRUE}
+set.seed(1035)
+masks_null <- masks %>%
+  specify(formula = Symptoms_Pct ~ Masks_Pct) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "correlation")
+visualize(masks_null)
+```
+
+<br>
+
+**Question:** What kind of decision does it look like we would reach after comparing what we observed to this null distribution?
+
+**Answer: It looks like we will reject the null hypothesis that there is a population correlation of 0 because our null distribution doesn't contain any values even close to our sample correlation of -0.85 in our data.**
+
+
+<br>
+
+
+## Confidence intervals for a correlation
+
+What about if we wanted to make a confidence interval? We would create a bootstrap distribution instead of a null distribution.
+
+```{r, eval = TRUE}
+masks_boot <- masks %>%
+  specify(formula = Symptoms_Pct ~ Masks_Pct) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "correlation")
+visualize(masks_boot)
+```
+
+And then we would use `get_confidence_interval()`
+
+```{r, eval = TRUE}
+get_confidence_interval(masks_boot, type = "percentile", level = 0.95)
+```
+
+<br>
+
+**Interpretation: I am 95% confident the true population correlation is between -0.914 and -0.780 (when looking at percentage of people in a state who report regularly wearing masks in public and the percentage of people who know someone with COVID-19 symptoms). In other words, we are 95% confident there is a strong negative relationship between these two variables.**
+
+<br>
+
+**Question:** Can you think of a reason why it might not make sense to use a hypothesis test or confidence interval for this example?
+
+**Answer: Each observation is a state and so the most likely population of interest is the 50 states (which is the same as our sample). This means we aren't really extending what we've seen to a broader group, we've actually sampled the whole group already.**
+
+**Someone could argue that our population a collection of the states at different points in time or that it's a process that produced these values. In that case, we may be able to use HTs/CIs.**
+
+**Even if we find a strong relationship, we aren't really sure if there is one or what the causal relationship is here**
+
+<br>
+
+---
+
+# Looking ahead
+
+While it's useful to talk about the correlation between two variables, oftentimes we want to go beyond that. If we want to make predictions based off of this relationship, or even just describe how these variables are related more specifically, we'll need to use something called linear regression. Linear regression is just a fancy term for putting a line through our points and then describing that line and making predictions with it. That will be the topic of our next couple sets of notes and their corresponding activities.
