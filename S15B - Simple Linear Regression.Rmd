@@ -1,0 +1,159 @@
+---
+title: "Activity 15B - Simple Linear Regression"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 11/7/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+We will use the following R packages during today's activity.
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(Lock5Data)
+```
+
+---
+
+For this activity, we'll use a dataset called `RestaurantTips` from the `Lock5Data` R package. The data was collected by the owner of a bistro in New York and contains 157 bills at the restaurant over a two week period. Let's explore the relationship between the size of the bill, called `Bill`, and the size of the tip, called `Tip`. Both variables are measured in dollars.
+
+I'm going to read the data into R and call it `tips` to shorten the name a bit.
+
+```{r}
+tips <- RestaurantTips
+```
+
+
+1. Suppose we want to create a scatterplot comparing the size of the bill and the tip size. Which variable should be the explanatory variable and which should be the response variable? Why?
+
+**The size of the bill (explanatory) helps us explain the size of the tip (reponse)**
+
+
+<br>
+
+2. Make a scatterplot comparing the bill size and the tip size.
+
+```{r}
+ggplot(tips) + 
+   geom_point(aes(x = Bill, y = Tip)) +
+   theme_bw()
+```
+
+
+<br>
+
+3. Describe the form, direction, and strength of the scatterplot.
+
+   - **Form** - Linear
+   - **Direction** - Positive
+   - **Strength** - Pretty strong
+   - **Outliers?** - There is one point with a $15 tip on a $60 bill that stands out a bit from the rest, but nothing too egregious
+
+
+<br>
+
+4. Let's use R to calculate a simple linear regression line for this data. Write the formula for the line after you run your R code.
+
+```{r}
+tips.lm <- lm(Tip ~ Bill, data = tips)
+tips.lm
+```
+
+**Formula: $\hat{y} = -0.2923 + 0.1822 x$**
+
+<br>
+
+5. Suppose you're a server at the restaurant and someone has just spent \$23.70 on a meal. How much would you predict their tip would be?
+
+```{r}
+predict(tips.lm, newdata = data.frame(Bill = 23.7))
+```
+
+**Prediction = \$4.03**
+
+<br>
+
+6. There was one person in the dataset who actually did have a bill of \$23.70. They left a \$10 tip. What would be the residual for that observation?
+
+**Residual = \$10 - \$4.03 = \$5.97**
+
+
+<br>
+
+7. Would it be a good idea to use this data to predict the tip size for a \$200 bill at this restaurant? Why or why not?
+
+**No. This would be a pretty big extrapolation. The largest bill size in the data was only around \$70.**
+
+
+<br>
+
+8. Would it be a good idea to use this data to predict the tip size for a \$20 bill at The Root here in Elon? Why or why not?
+
+**Maybe? We should use caution because data from one place may not apply to data from another place, but there are general standards for tipping that are somewhat universal and so tips at The Root may actually be similar to tips at this other restaurant.**
+
+
+<br>
+
+9. You can actually add a simple linear regression line to your scatterplot by adding `geom_smooth(method = "lm", se = FALSE)` as another layer to your ggplot object. Try this out below. Can you find the observation whose residual we just calculated on the graph? (Note: You will need to respecify your x and y aesthetics in `geom_smooth()` or move them to the `ggplot()` function instead.)
+
+```{r}
+ggplot(tips, aes(x = Bill, y = Tip)) + 
+   geom_point() +
+   geom_smooth(method = "lm", se = FALSE) +
+#   theme_bw() +
+   NULL
+```
+
+
+
+<br>
+
+10. Interpret the estimated y-intercept in context of this problem. Is this an extrapolation or an interpolation?
+
+**Interpretation of y-intercept (-0.2923): The predicted tip is -29 cents when the bill is zero dollars. This is an extrapolation because we don't have any bills of zero dollars. We also know this doesn't make sense because you can't have negative money.**
+
+<br>
+
+11. Interpret the estimated slope in context of this problem.
+
+**Interpretation of slope (0.1822): For every additional \$1 on a bill, the predicted tip goes up by 18 cents.**
+
+
+<br>
+
+12. Does your estimated slope make sense based on what you know about tipping?
+
+**Yes, most people tip between 15 to 20 percent it seems, so having an average of 18 percent makes sense.**
+
+
+<br>
+
+13. The Washington Post article we read for our last activity talked about something called the "R squared" value for a simple linear regression. This value tells us the proportion of the variability in our response variable that can be explained by our explanatory variable in our data set. Use the `summary()` function on the object created by the `lm()` function. Find the R-squared value in the output and write a sentence interpreting it.
+
+```{r}
+summary(tips.lm)
+cor(tips$Bill, tips$Tip)^2
+```
+
+
+**R-squared = 0.8373**
+
+**Interpretation: About 84% of the variability in tips can be explained by the size of the bill.**
+
+
+---
+
+Bonus: Investigate how well the size of the bill can help predict the tip percentage (`PctTip`).
+
+* Make a scatterplot. What is the relationship between the two variables? How does it compare to what we saw when we compared bill size to tip size (both in terms of dollars).
+
+
+* Calculate a simple linear regression line and interpret the estimated intercept and estimated slope.

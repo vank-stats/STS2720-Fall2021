@@ -1,0 +1,164 @@
+---
+title: "Activity 16A - Multiple Linear Regression"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 11/9/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+We will use the following R packages during today's activity.
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(dplyr)
+library(Lock5Data)
+```
+
+---
+
+For this activity, we'll use a dataset called `SampCountries` from the `Lock5Data` R package. The data is a sample of data from 50 countries (in 2014). There are a total of 25 variables, but we will look at just a few of those. Our goal will be to see if we can predict the average life expectancy of a country based on some other variables.
+
+I'm going to read the data into R and call it `countries` to shorten the name a bit.
+
+```{r}
+countries <- SampCountries2e %>%
+  select(Country, LifeExpectancy, GDP, Internet, BirthRate, CO2)
+```
+
+I've also limited the data to just include the following variables:
+
+* `Country` - Name of the country
+* `LifeExpectancy` - Average life expectancy (in years)
+* `GDP` - Gross Domestic Produce per capita (in US dollars)
+* `Internet` - Percentage of the population with access to the internet
+* `BirthRate` - Births per 1,000 people
+* `CO2` - CO2 emissions (in metric tons per capita)
+
+
+1. Below is code to generate scatterplots to compare each of the quantitative variables above with Life Expectancy. Which variables do you think would work well in a multiple linear regression model? Which wouldn't? Why?
+
+**Variables that will work well**: CO2 and BirthRate (maybe Internet) 
+
+**Variables that won't**: GDP
+
+**Explanation**: GDP has a strong relationship with LifeExpectancy BUT it is non-linear. Internet looks closer to linear in its relationship. 
+
+**Further investigation showed that BirthRate and CO2 are HIGHLY correlated with one another. We decided to only include one of these in our multiple linear regression.**
+
+```{r}
+g <- ggplot(countries, aes(y = LifeExpectancy))
+g + geom_point(aes(x = Internet))
+g + geom_point(aes(x = BirthRate))
+g + geom_point(aes(x = GDP))
+g + geom_point(aes(x = CO2))
+```
+
+
+<br>
+
+
+
+2. Let's use R to create a multiple linear regression model to predict a country's life expectancy. Don't use the variable that seemed like it would work worst for linear regression. Write out the formula that you get when using the other three variables to predict life expectancy for countries. (**CHANGE: AND ONLY USE ONE OF THE TWO HIGHLY CORRELATED VARIABLES**)
+
+
+```{r}
+lifeexp.lm <- lm(LifeExpectancy ~ Internet + CO2, data = countries)
+lifeexp.lm
+```
+
+$$\hat{y} = 77.5873 + 0.1182*Internet -0.5864*CO2$$
+
+<br>
+
+
+
+3. Do the slopes for our explanatory variables match what we saw in the scatterplots above?
+
+**Yes**
+
+<br>
+
+
+
+4. Interpret the estimated y-intercept in context of this example. Is this an interpolation or an extrapolation?
+
+**This is an extrapolation because no countries have 0 for Internet or CO2, but there are some countries somewhat close for both variables, so it isn't as big of an extrapolation as other examples we've seen.**
+
+**The predicted life expectancy is 77.6 years old for a country with no CO2 emissions and 0% of the country with internet access.**
+
+<br>
+
+
+
+5. Pick one or two of the estimated slopes to interpret in context of this example.
+
+**CO2: The predicted life expectancy decreases by 0.59 years for each additional metric ton of CO2 per capita**
+
+**Internet:: The predicted life expectancy increases by 0.12 years for each additional percentage point of the population with internet access**
+
+**Note: It appears that this data may not be accurate (the CO2 levels are a bit odd), but we will treat it as if it is for the sake of this activity (and 16B)**
+
+<br>
+
+
+
+6. Since CO2 has a positive slope (**if BirthRate is part of our model**), do you think countries could increase their life expectancy by producing more CO2? Why or why not?
+
+```{r}
+lm(LifeExpectancy ~ CO2 + BirthRate + GDP, data = countries)
+```
+
+
+**Clearly producing more CO2 should not lead people to live longer. What we saw is that CO2 is so highly correlated with BirthRate that it's very hard to disentangle the effects of one from the other.**
+
+**Additionally, we would interpret this as a change in CO2 while the other variables stay the same (which may not be realistic)**
+
+<br>
+
+
+
+7. Run the code below to see the values for the United States. Calculate the predicted life expectancy for the US using your model.
+
+```{r}
+countries %>%
+  filter(Country == "United States")
+
+predict(lifeexp.lm, newdata = data.frame(Internet = 84.2, CO2 = 12.6))
+```
+
+**Predicted life expectancy for US**: 80.15 years (for model with Internet and CO2 as explanatory variables)
+
+<br>
+
+
+
+8. What is the residual for the United States?
+
+**$Residual = y - \hat{y} = 78.8 - 80.16 = -1.36 years**
+
+**This means the actual life expectancy is 1.36 years lower than what our model (using CO2 and Internet) predicts**
+
+<br>
+
+
+
+9. We talked about the R-squared value in our last activity. What is the R-squared value for this example? Write a sentence to interpret it in context.
+
+```{r}
+summary(lifeexp.lm)
+```
+
+
+**In the output from the summary() function, we can see that $R^2$ value is 0.71. This tells us that 71% of the variability in life expectancy can be explained by CO2 emissions and Internet access.**
+
+**Adding explanatory variables will NEVER decrease $R^2$ because having more information shouldn't lead to less explanation of our variability (within our data). HOWEVER, we do not want models with tons and tons of variables because in reality some of them may not really be helping and the model will be hard to interpret. This will be explored more in Activity 16B.**
+
+**The adjusted $R^2$ attempts to take this into account by penalizing models with more variables. Try finding the $R^2$ value for a model that also includes BirthRate. You should find that $R^2$ is higher for this model (more explanatory variables) but adjusted $R^2$ is lower (new variables aren't necessarily helping much)**
