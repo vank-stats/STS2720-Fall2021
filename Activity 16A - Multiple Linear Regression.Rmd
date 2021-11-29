@@ -1,0 +1,135 @@
+---
+title: "Activity 16A - Multiple Linear Regression"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 11/9/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+We will use the following R packages during today's activity.
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(dplyr)
+library(Lock5Data)
+```
+
+---
+
+For this activity, we'll use a dataset called `SampCountries` from the `Lock5Data` R package. The data is a sample of data from 50 countries (in 2014). There are a total of 25 variables, but we will look at just a few of those. Our goal will be to see if we can predict the average life expectancy of a country based on some other variables.
+
+I'm going to read the data into R and call it `countries` to shorten the name a bit.
+
+```{r}
+countries <- SampCountries2e %>%
+  select(Country, LifeExpectancy, GDP, Internet, BirthRate, CO2)
+```
+
+I've also limited the data to just include the following variables:
+
+* `Country` - Name of the country
+* `LifeExpectancy` - Average life expectancy (in years)
+* `GDP` - Gross Domestic Produce per capita (in US dollars)
+* `Internet` - Percentage of the population with access to the internet
+* `BirthRate` - Births per 1,000 people
+* `CO2` - CO2 emissions (in metric tons per capita)
+
+
+1. Below is code to generate scatterplots to compare each of the quantitative variables above with Life Expectancy. Which variables do you think would work well in a multiple linear regression model? Which wouldn't? Why?
+
+**Variables that will work well**: 
+
+**Variables that won't**:
+
+**Explanation**: 
+
+```{r}
+g <- ggplot(countries, aes(y = LifeExpectancy))
+g + geom_point(aes(x = Internet))
+g + geom_point(aes(x = BirthRate))
+g + geom_point(aes(x = GDP))
+g + geom_point(aes(x = CO2))
+```
+
+
+<br>
+
+
+
+2. Let's use R to create a multiple linear regression model to predict a country's life expectancy. Don't use the variable that seemed like it would work worst for linear regression. Write out the formula that you get when using the other three variables to predict life expectancy for countries.
+
+
+```{r}
+
+```
+
+$$\hat{y} = ...$$
+
+<br>
+
+
+
+3. Do the slopes for our explanatory variables match what we saw in the scatterplots above?
+
+**ANSWER**
+
+<br>
+
+
+
+4. Interpret the estimated y-intercept in context of this example. Is this an interpolation or an extrapolation?
+
+**ANSWER**
+
+<br>
+
+
+
+5. Pick one or two of the estimated slopes to interpret in context of this example.
+
+**ANSWER**
+
+<br>
+
+
+
+6. Since CO2 has a positive slope, do you think countries could increase their life expectancy by producing more CO2? Why or why not?
+
+**ANSWER**
+
+<br>
+
+
+
+7. Run the code below to see the values for the United States. Calculate the predicted life expectancy for the US using your model.
+
+```{r}
+countries %>%
+  filter(Country == "United States")
+```
+
+**Predicted life expectancy for US:**
+
+<br>
+
+
+
+8. What is the residual for the United States?
+
+**Residual =**
+
+<br>
+
+
+
+9. We talked about the R-squared value in our last activity. What is the R-squared value for this example? Write a sentence to interpret it in context.
+
+**ANSWER**

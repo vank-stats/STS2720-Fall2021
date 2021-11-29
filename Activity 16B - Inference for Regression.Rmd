@@ -1,0 +1,269 @@
+---
+title: "Activity 16B - Inference for Regression"
+author: "STS2720 (Dr. VanKrevelen)"
+date: 'Updated: 11/9/2021'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+We will use the following R packages during today's activity.
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(dplyr)
+library(Lock5Data)
+library(moderndive)
+```
+
+---
+
+The goal of today's activity is to consider how we can use hypothesis tests and confidence intervals with regression. This can be done for our coefficients (i.e. the intercept or slope(s)) or for a prediction. In multiple linear regression, we can use hypothesis tests to decide which variables to use for our explanatory variables.
+
+Let's continue using the dataset called `SampCountries2e` from the `Lock5Data` R package. Recall that the data is a sample of data from 50 countries (in 2014). There are a total of 25 variables, but I've narrowed it to just a few below and shortened the name to `countries`.
+
+```{r}
+countries <- SampCountries2e %>%
+  select(Country, LifeExpectancy, Population, Internet, BirthRate, CO2)
+```
+
+Here is a recap of the variables left in the data
+
+* `Country` - Name of the country
+* `LifeExpectancy` - Average life expectancy (in years)
+* `Population` - Population (in millions)
+* `Internet` - Percentage of the population with access to the internet
+* `BirthRate` - Births per 1,000 people
+* `CO2` - CO2 emissions (in metric tons per capita)
+
+---
+
+# Hypothesis Tests for a slope
+
+Recall that when we first talked about simple linear regression, we discussed a "true model" and an "estimated model".
+
+
+<br>
+
+True model: $y = \beta_0 + \beta_1 x$
+
+Estimated model: $\hat{y} = b_0 + b_1 x$
+
+<br>
+
+
+One thing of interest to us is whether there is even a linear relationship between our variables. In other words, we may want to test:
+
+
+<br>
+
+$H_0: \beta_1 = 0$ (no linear relationship between x and y)
+
+$H_a: \beta_1 \ne 0$ (some sort of linear relationship between x and y)
+
+<br>
+
+
+1. Let's create a simple linear regression model to predict life expectancy based on CO2 emissions. Store the model in an object called `co2.lm` and use the `get_regression_table()` function on that object. (Note: The `get_regression_table()` function is part of the `moderndive` package that goes along with our textbook. The `summary()` function provides similar output with slightly less detail.)
+
+```{r}
+
+```
+
+<br>
+
+2. What is our estimate of the true slope to predict life expectancy for a country based on its CO2 emissions?
+
+**ANSWER**
+
+
+<br>
+
+3. Notice the second column is titled Std. Error. What do you think that number tells us?
+
+**ANSWER**
+
+
+<br>
+
+4. The final column is a p-value for the hypothesis test mentioned above. What is our p-value and what conclusion would we make for the hypothesis test we discussed?
+
+**ANSWER**
+
+
+<br>
+
+5. Create a simple linear regression model using `Population` to predict `LifeExpectancy`. What sort of conclusion would you reach if you do a hypothesis test for the slope in this example?
+
+**ANSWER**
+
+
+<br>
+<br>
+
+## Background for this hypothesis test
+
+This test is done using a theory-based method. For this method, we calculate:
+
+$$t = \frac{b_1}{\sqrt{MSE} \sqrt{\frac{1}{(n-1)s_x^2}}}$$
+
+and then compare the value we get to a T distribution with $n - 2$ degree of freedom. That is because if the null hypothesis (and a couple other conditions) are true, the test statistics from many different random samples would make this shape for their distribution.
+
+You can see [Section 4 of Chapter 10](https://moderndive.com/10-inference-for-regression.html#infer-regression) for an example of how to use the `infer` package if you'd like.
+
+---
+
+# Confidence Intervals for a slope
+
+We could make a confidence interval for our slope if we wanted to be able to communicate how much certainty/uncertainty there was in our estimate of the true slope.
+
+
+6. The estimated slope associated with CO2 was -0.841. Write a sentence interpreting this number in context of this example.
+
+**ANSWER**
+
+
+<br>
+
+7. Use the `get_regression_table()` function on our `co2.lm` object again. This time pay attention to lower_ci and upper_ci columns. These are the endpoints to a 95% confidence interval for our estimate of the true slope. Write a sentence interpreting this confidence interval in context of this example.
+
+**ANSWER**
+
+
+<br>
+<br>
+
+## Background for this interval
+
+This confidence interval is based on the formula
+
+$$b_1 \pm t^*_{1-\frac{\alpha}{2}, n-2} \sqrt{MSE}\sqrt{\frac{1}{(n-1)s_x^2}}$$
+
+Don't worry about the actual formula as much as noticing that it follows our typical
+
+$$\text{estimate} \pm \text{critical value} * \text{standard error}$$
+
+format we talked about previously. 
+
+- $b_1$ is our estimate of the true slope.
+- $t^*_{1-\frac{\alpha}{2}, n-2}$ is a critical value to control how confident we want to be that our interval contains $\beta_1$
+- $\sqrt{MSE}\sqrt{\frac{1}{(n-1)s_x^2}}$ is the standard error that measures how much our estimate typically varies from sample to sample
+
+---
+
+# Confidence/Prediction Intervals for a Predicted Value
+
+In addition to making confidence intervals for our slope, we can create confidence intervals for a single point on our line too.
+
+I've added code below to create a scatter plot of `CO2` versus `LifeExpectancy`. The `geom_smooth()` function along with the `method = "lm"` argument is used to add a simple linear regression line to the graph.
+
+```{r}
+ggplot(countries, aes(x = CO2, y = LifeExpectancy)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+The shaded area around the line is a 95% confidence interval for the population mean response at each value of `CO2`. 
+
+<br>
+
+8. Use the `predict.lm()` function to predict the life expectancy for a country with 30 metric tons of CO2 emissions per capita. I've gotten you started. What is our prediction?
+
+```{r, eval = FALSE}
+predict.lm(co2.lm, newdata = data.frame())
+```
+
+**ANSWER**
+
+
+<br>
+
+9. Run the code above again but this time add a new argument of `interval = "confidence"`. This will give us a 95% confidence interval for the population mean. Does it look like it matches what you see on the graph?
+
+**ANSWER**
+
+
+<br>
+
+10. Does it look like 95% of the points fall inside our 95% confidence interval? Why do you think that might be?
+
+**ANSWER**
+
+
+<br>
+
+11. A prediction interval is an interval for a specific individual/observation (rather than for a population mean). Run the code from question 9, but change `interval = "confidence"` to `interval = "prediction"`. How does the prediction interval compare to the confidence interval? Why do you think that is?
+
+**ANSWER**
+
+
+<br>
+
+12. Interpret the interval above. Remember that this is an interval for an *individual observation* instead of a *parameter*.
+
+**ANSWER**
+
+
+<br>
+
+---
+
+# Using Hypothesis Tests for MLR
+
+In our previous activity, we created a multiple linear regression model to predict life expectancy. I've run the model below and displayed the results using the `summary()` function.
+
+```{r}
+countries_mlr <- lm(LifeExpectancy ~ Internet + CO2 + BirthRate, data = countries)
+summary(countries_mlr)
+```
+
+Notice that some of our explanatory variables have p-values next to their estimated slopes that indicate there isn't sufficient evidence they have a linear relationship with our response (once we've accounted for the other explanatory variables). This means we may not need them in our model.
+
+<br>
+
+**Backwards selection** is a method for choosing the "best" multiple linear regression model to use. 
+
+- To start, we fit a multiple linear regression model where many explanatory variables are used to predict a response.
+- If any of our slopes have p-values above a certain threshhold (say $\alpha = 0.05$ or $\alpha = 0.1$), we remove the variable with the *highest* p-value and re-fit our model.
+- We will repeat this process until all of the explanatory variables in our model have p-values below a desired threshhold
+
+<br>
+
+13. Let's try using backwards selection with our countries model. Which variable should we remove first?
+
+**ANSWER**
+
+
+
+<br>
+
+14. Remove that variable and re-fit the model. Are there any other variables we should remove?
+
+```{r}
+
+```
+
+**ANSWER**
+
+<br>
+
+15. What do you notice about the estimated slope for `BirthRate` from our first model to our second? Why do you think that happened?
+
+**ANSWER**
+
+
+<br>
+
+16. How did the R-squared value change?
+
+**ANSWER**
+
+
+<br>
